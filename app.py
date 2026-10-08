@@ -88,9 +88,12 @@ def load_data():
         "swot_metrics", "player_ratings", "team_ratings", 
         "team_strength", "entry_routes", "press_triggers"
     ]:
-        fpath = os.path.join(models_dir, f"{name}.csv")
-        if os.path.exists(fpath):
-            data[name] = pd.read_csv(fpath)
+        fpath_parquet = os.path.join(models_dir, f"{name}.parquet")
+        fpath_csv = os.path.join(models_dir, f"{name}.csv")
+        if os.path.exists(fpath_parquet):
+            data[name] = pd.read_parquet(fpath_parquet)
+        elif os.path.exists(fpath_csv):
+            data[name] = pd.read_csv(fpath_csv)
         else:
             data[name] = pd.DataFrame()
             

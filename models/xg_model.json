@@ -1,0 +1,99 @@
+{
+  "model": "logistic_regression",
+  "features": [
+    "log_dist",
+    "angle",
+    "is_head",
+    "is_freekick",
+    "prev_cross",
+    "prev_pass",
+    "prev_takeon"
+  ],
+  "random_state": 42,
+  "coefficients": {
+    "log_dist": -2.2379,
+    "angle": 0.61144,
+    "is_head": -0.75629,
+    "is_freekick": 0.80164,
+    "prev_cross": -0.32287,
+    "prev_pass": 0.09044,
+    "prev_takeon": 0.32499
+  },
+  "intercept": 3.80508,
+  "penalty_xg": 0.7249,
+  "validation": {
+    "n_train": 36132,
+    "n_test": 9155,
+    "brier": 0.07892,
+    "brier_baseline": 0.09048,
+    "log_loss": 0.27774,
+    "roc_auc": 0.7727,
+    "mean_pred": 0.1012,
+    "observed_rate": 0.1006,
+    "reliability": [
+      {
+        "bin": 0,
+        "n": 909,
+        "mean_pred": 0.0195,
+        "observed": 0.022
+      },
+      {
+        "bin": 1,
+        "n": 921,
+        "mean_pred": 0.029,
+        "observed": 0.0261
+      },
+      {
+        "bin": 2,
+        "n": 917,
+        "mean_pred": 0.0378,
+        "observed": 0.0305
+      },
+      {
+        "bin": 3,
+        "n": 915,
+        "mean_pred": 0.0482,
+        "observed": 0.0426
+      },
+      {
+        "bin": 4,
+        "n": 915,
+        "mean_pred": 0.0604,
+        "observed": 0.0393
+      },
+      {
+        "bin": 5,
+        "n": 914,
+        "mean_pred": 0.0747,
+        "observed": 0.0766
+      },
+      {
+        "bin": 6,
+        "n": 915,
+        "mean_pred": 0.0929,
+        "observed": 0.1071
+      },
+      {
+        "bin": 7,
+        "n": 918,
+        "mean_pred": 0.1184,
+        "observed": 0.1209
+      },
+      {
+        "bin": 8,
+        "n": 915,
+        "mean_pred": 0.1626,
+        "observed": 0.1705
+      },
+      {
+        "bin": 9,
+        "n": 916,
+        "mean_pred": 0.3679,
+        "observed": 0.3701
+      }
+    ],
+    "team_season_xg_goals_r": 0.9454,
+    "total_xg": 5106.2,
+    "total_goals": 5106
+  }
+}
