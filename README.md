@@ -80,31 +80,162 @@ final project/
 
 ---
 
-## Quickstart Guide
+## Setup from Scratch (Clean Machine Guide)
 
-### 1. Installation
+Follow these steps to set up and run the entire platform on a clean developer machine.
 
-Clone the repository and install required packages:
+### 1. Prerequisites & Environment Setup
+
+- **Python**: 3.10+ (tested on Python 3.11).
+- **Node.js**: 18+ (tested on Node.js 20+ / 24) for the React dashboard.
+
+Create and activate a virtual environment:
 ```bash
-git clone https://github.com/your-username/tactical-football-analytics.git
-cd "final project"
+# Clone the repository
+git clone https://github.com/ZyadWKhedr/Tactical-Analytics-Engine-Match-Scouting-Platform.git
+cd Tactical-Analytics-Engine-Match-Scouting-Platform
+
+# Create Python virtual environment
+python -m venv .venv
+
+# Activate on Windows:
+.venv\Scripts\activate
+# Activate on Linux/macOS:
+source .venv/bin/activate
+
+# Install all runtime, ETL, API, and testing dependencies
 pip install -r requirements.txt
 ```
 
-### 2. Launch the Interactive Scouting Web Application
+---
+
+### 2. Raw Data Placement (`data/wyscout/`)
+
+The raw Wyscout event data files (gitignored) must be placed in `data/wyscout/`. The ETL loader (`etl/load_wyscout.py`) expects the following 17 JSON files:
+```
+data/wyscout/
+├── competitions.json
+├── teams.json
+├── players.json
+├── matches_England.json
+├── events_England.json
+├── matches_Spain.json
+├── events_Spain.json
+├── matches_Italy.json
+├── events_Italy.json
+├── matches_Germany.json
+├── events_Germany.json
+├── matches_France.json
+├── events_France.json
+├── matches_European_Championship.json
+├── events_European_Championship.json
+├── matches_World_Cup.json
+└── events_World_Cup.json
+```
+
+---
+
+### 3. Database Configuration & Platform Portability
+
+The platform supports two database modes:
+1. **Embedded PostgreSQL (Zero Setup)**: If `DATABASE_URL` is omitted, the engine uses [`pgserver`](https://github.com/frostming/pgserver) to run an embedded PostgreSQL 16 instance storing data in `data/pgdata`. No external PostgreSQL installation or Docker container is required.
+2. **External PostgreSQL**: Define `DATABASE_URL` in a `.env` file in the repository root:
+   ```env
+   DATABASE_URL=postgresql://postgres:password@localhost:5432/tactical
+   ```
+
+> [!WARNING]
+> **Cross-Platform Portability**: PostgreSQL cluster directories (`data/pgdata`) are binary-compiled and **not portable across different operating systems**. If cloning on Linux or macOS, do not copy a Windows `data/pgdata` folder; initialize a fresh database via the ETL pipeline below.
+
+---
+
+### 4. Running the ETL Pipeline
+
+Run the ETL in the following exact sequence:
 
 ```bash
-streamlit run app.py
+# Step 1: Ingest raw Wyscout JSON -> validate -> deduplicate -> load into PostgreSQL
+python -m etl.load_wyscout
+
+# (Optional: run with '--limit 1' for a fast 1-match smoke test per league)
+# python -m etl.load_wyscout --limit 1
+
+# Step 2: Calibrate Expected Goals (xG) and Expected Assists (xA) models
+python -m etl.xg_xa
 ```
-This opens the tactical scouting application in your default browser at `http://localhost:8501`.
 
-### 3. Running the Jupyter Notebooks
+Outputs:
+- Schema `core` populated in PostgreSQL (`matches`, `teams`, `players`, `events`, `lineups`, `fixtures`, `squad_ratings`, `shots`).
+- Validation report: `etl/reports/etl_report.json`.
+- Serialized models: `models/shots_xg.parquet` and `models/xg_model.json`.
 
-Open Jupyter Lab or Notebook to step through the modular analysis pipeline:
+---
+
+### 5. Launching the Services
+
+> [!NOTE]
+> **Dashboard Roles**:
+> - `frontend/` (React + TypeScript + Vite): The primary **Phase 1 Scouting Dashboard** (Person 4 deliverable) featuring the interactive pitch visualizer, tactical radars, opponent blueprints, passing networks, and matchup simulator.
+> - `app.py` (Streamlit in root): The earlier exploratory data interface (legacy Phase 0 prototype).
+
+#### Option A: Unified Launcher
+- **Windows**:
+  ```bat
+  start_all.bat
+  ```
+- **Linux / macOS**:
+  ```bash
+  chmod +x start.sh
+  ./start.sh
+  # Or via Makefile:
+  make run
+  ```
+
+#### Option B: Individual Services
+
+1. **Launch the FastAPI REST API (port 8000)**:
+   ```bash
+   uvicorn backend.app.main:app --host 127.0.0.1 --port 8000 --reload
+   # Or on Windows: start_api.bat
+   ```
+   Interactive OpenAPI documentation is available at **[http://localhost:8000/docs](http://localhost:8000/docs)**.
+
+2. **Launch the React Frontend (port 5173)**:
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   # Or on Windows: start_dashboard.bat
+   ```
+   Dashboard available at **[http://localhost:5173](http://localhost:5173)**.  
+   *(Vite proxies API calls to `http://127.0.0.1:8000`. To customize the backend target, set `VITE_API_BASE` in `frontend/.env`).*
+
+3. **Legacy Streamlit Explorer (Optional)**:
+   ```bash
+   streamlit run app.py
+   ```
+
+---
+
+### 6. Running Validation & Test Suites
+
+```bash
+# 1. Run the mathematical and tactical logic integrity audit:
+python verify_logic.py
+
+# 2. Run the FastAPI contract and endpoint integration test suite:
+python -m pytest tests/test_api.py -v
+```
+
+---
+
+### 7. Running the Research Notebooks (Persons 1–3)
+
+Open Jupyter Lab to inspect the underlying research and model calibration notebooks:
 ```bash
 jupyter lab
 ```
-Navigate to `notebooks/` and run notebooks `01` through `07` in sequence.
+Navigate to `notebooks/` and run notebooks `01` through `09` in sequence.
 
 ---
 

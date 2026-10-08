@@ -1,0 +1,50 @@
+{
+  "runtime_seconds": 800.3,
+  "competitions": [
+    "England",
+    "Spain",
+    "Italy",
+    "Germany",
+    "France",
+    "European_Championship",
+    "World_Cup"
+  ],
+  "limit_per_competition": null,
+  "pipeline_stats": {
+    "raw_duplicates_removed": 0,
+    "raw_unknown_team_removed": 0,
+    "raw_missing_position_removed": 0,
+    "raw_events": 3251294,
+    "spadl_duplicates_removed": 795,
+    "coords_clipped": 0,
+    "missing_time_removed": 0,
+    "spadl_actions": 2463297,
+    "unknown_player_remapped": 0,
+    "matches": 1941
+  },
+  "integrity_checks": {
+    "row_counts": {
+      "competitions": 7,
+      "teams": 142,
+      "players": 3604,
+      "fixtures": 1941,
+      "matches": 1941,
+      "lineups": 53794,
+      "events": 2463297,
+      "squad_ratings": 142
+    },
+    "checks": {
+      "matches_without_fixture": 0,
+      "matches_without_events": 0,
+      "events_team_not_in_match": 0,
+      "lineup_team_not_in_match": 0,
+      "matches_without_two_lineups": 0,
+      "starters_not_eleven": 0,
+      "duplicate_original_events": 0,
+      "non_monotonic_clock": 0,
+      "goals_mismatch_score": 8,
+      "squad_ratings_orphans": 0,
+      "shots_xg_out_of_range": 0
+    }
+  }
+}
