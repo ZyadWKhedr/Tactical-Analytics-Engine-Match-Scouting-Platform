@@ -40,14 +40,33 @@ export const PlayerRatingsView: React.FC = () => {
     }
   }, [selectedPlayerId]);
 
+// Decodes literal unicode sequences if present in raw feeds
+function cleanName(name?: string | null): string {
+  if (!name) return '';
+  return name.replace(/\\u([0-9a-fA-F]{4})/g, (_, hex) =>
+    String.fromCharCode(parseInt(hex, 16))
+  );
+}
+
+// Converts raw tactical component z-scores (mean 0, std ~0.92) to standard percentile rank (1 - 99)
+function zToPercentile(z: number | null | undefined): number {
+  if (z === null || z === undefined || isNaN(z)) return 50;
+  // Standard normal CDF approximation: Phi(z) * 100
+  const t = 1 / (1 + 0.2316419 * Math.abs(z));
+  const d = 0.3989423 * Math.exp((-z * z) / 2);
+  let p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
+  if (z > 0) p = 1 - p;
+  return Math.min(99, Math.max(1, Math.round(p * 100)));
+}
+
   const radarData = playerProfile?.rating?.components
     ? [
-        { label: 'Progression', value: (playerProfile.rating.components.progression || 0) * 10 },
-        { label: 'Creation', value: (playerProfile.rating.components.creation || 0) * 10 },
-        { label: 'Finishing', value: (playerProfile.rating.components.finishing || 0) * 10 },
-        { label: 'Retention', value: (playerProfile.rating.components.retention || 0) * 10 },
-        { label: 'Defending', value: (playerProfile.rating.components.defending || 0) * 10 },
-        { label: 'Discipline', value: (playerProfile.rating.components.discipline || 0) * 10 },
+        { label: 'Progression', value: zToPercentile(playerProfile.rating.components.progression) },
+        { label: 'Creation', value: zToPercentile(playerProfile.rating.components.creation) },
+        { label: 'Finishing', value: zToPercentile(playerProfile.rating.components.finishing) },
+        { label: 'Retention', value: zToPercentile(playerProfile.rating.components.retention) },
+        { label: 'Defending', value: zToPercentile(playerProfile.rating.components.defending) },
+        { label: 'Discipline', value: zToPercentile(playerProfile.rating.components.discipline) },
       ]
     : [];
 
@@ -134,7 +153,7 @@ export const PlayerRatingsView: React.FC = () => {
               <tbody>
                 {players.map((p) => (
                   <tr key={p.player.player_id} className="table-row-hover">
-                    <td className="font-semibold">{p.player.name}</td>
+                    <td className="font-semibold">{cleanName(p.player.name)}</td>
                     <td>{p.team?.name || '—'}</td>
                     <td>
                       <span className="tag-pill">{p.position_group || 'Universal'}</span>
@@ -174,7 +193,7 @@ export const PlayerRatingsView: React.FC = () => {
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <div>
-                <h2>{playerProfile.full_name || playerProfile.player.name}</h2>
+                <h2>{cleanName(playerProfile.full_name || playerProfile.player.name)}</h2>
                 <p className="subtitle">
                   {playerProfile.role || 'Player'} • {playerProfile.current_team?.name || 'Club'} • {playerProfile.nationality || 'International'}
                 </p>
@@ -210,9 +229,9 @@ export const PlayerRatingsView: React.FC = () => {
               {radarData.length > 0 && (
                 <div style={{ marginTop: '20px' }}>
                   <h4 style={{ textAlign: 'center', marginBottom: '10px', color: '#94a3b8' }}>
-                    Tactical Contribution Radar
+                    Tactical Contribution Radar (Percentile in Role)
                   </h4>
-                  <RadarChart data={radarData} size={320} />
+                  <RadarChart data={radarData} size={360} />
                 </div>
               )}
             </div>

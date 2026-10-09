@@ -30,31 +30,54 @@ export function App() {
   const [meta, setMeta] = useState<MetaOut | null>(null);
   const [teams, setTeams] = useState<TeamSummary[]>([]);
   const [selectedTeamId, setSelectedTeamId] = useState<number>(1613); // Default: Newcastle United
+  const [matchupTeamB, setMatchupTeamB] = useState<number>(1659); // Default: AFC Bournemouth
   const [connected, setConnected] = useState<boolean>(false);
 
   useEffect(() => {
-    api.getMeta()
-      .then((m) => {
+    let timer: ReturnType<typeof setTimeout>;
+    let isSubscribed = true;
+
+    const pollApi = async () => {
+      try {
+        const m = await api.getMeta();
+        if (!isSubscribed) return;
         setMeta(m);
         setConnected(true);
-      })
-      .catch((err) => {
-        console.error('Failed to connect to API:', err);
-        setConnected(false);
-      });
 
-    api.getTeams()
-      .then((t) => {
+        const t = await api.getTeams();
+        if (!isSubscribed) return;
         setTeams(t);
         if (t.length > 0 && !t.some((x) => x.team.team_id === selectedTeamId)) {
           setSelectedTeamId(t[0].team.team_id);
+          if (t.length > 1) {
+            setMatchupTeamB(t[1].team.team_id);
+          }
         }
-      })
-      .catch((err) => console.error(err));
+      } catch {
+        if (!isSubscribed) return;
+        setConnected(false);
+        // Retry every 1.5 seconds until backend finishes initializing
+        timer = setTimeout(pollApi, 1500);
+      }
+    };
+
+    pollApi();
+    return () => {
+      isSubscribed = false;
+      clearTimeout(timer);
+    };
   }, []);
 
-  const handleSelectTeam = (teamId: number) => {
+  const handleSelectTeamId = (teamId: number) => {
+    if (teamId === matchupTeamB) {
+      // Auto-swap: Team B gets the previous active team so duplicates never occur
+      setMatchupTeamB(selectedTeamId);
+    }
     setSelectedTeamId(teamId);
+  };
+
+  const handleSelectTeam = (teamId: number) => {
+    handleSelectTeamId(teamId);
     setActiveTab('blueprint');
   };
 
@@ -62,7 +85,11 @@ export function App() {
     <div className="app-layout">
       {/* Tactical Navigation Sidebar */}
       <aside className="sidebar">
-        <div className="sidebar-header">
+        <div
+          className="sidebar-header"
+          onClick={() => setActiveTab('overview')}
+          title="Return to Executive Overview"
+        >
           <div className="brand-title">
             <span style={{ fontSize: '1.4rem' }}>⚽</span>
             <span>TACTICAL OS</span>
@@ -153,7 +180,7 @@ export function App() {
           <BlueprintView
             teams={teams}
             selectedTeamId={selectedTeamId}
-            onSelectTeamId={setSelectedTeamId}
+            onSelectTeamId={handleSelectTeamId}
           />
         )}
 
@@ -170,7 +197,7 @@ export function App() {
           <SwotView
             teams={teams}
             selectedTeamId={selectedTeamId}
-            onSelectTeamId={setSelectedTeamId}
+            onSelectTeamId={handleSelectTeamId}
           />
         )}
 
@@ -178,7 +205,7 @@ export function App() {
           <XgView
             teams={teams}
             selectedTeamId={selectedTeamId}
-            onSelectTeamId={setSelectedTeamId}
+            onSelectTeamId={handleSelectTeamId}
           />
         )}
 
@@ -190,12 +217,28 @@ export function App() {
           <HeatmapView
             teams={teams}
             selectedTeamId={selectedTeamId}
-            onSelectTeamId={setSelectedTeamId}
+            onSelectTeamId={handleSelectTeamId}
           />
         )}
 
         {activeTab === 'matchup' && (
-          <MatchupView teams={teams} defaultTeamA={selectedTeamId} />
+          <MatchupView
+            teams={teams}
+            teamA={selectedTeamId}
+            teamB={matchupTeamB}
+            onSelectTeamA={(newA) => {
+              if (newA === matchupTeamB) {
+                setMatchupTeamB(selectedTeamId);
+              }
+              setSelectedTeamId(newA);
+            }}
+            onSelectTeamB={(newB) => {
+              if (newB === selectedTeamId) {
+                setSelectedTeamId(matchupTeamB);
+              }
+              setMatchupTeamB(newB);
+            }}
+          />
         )}
       </main>
     </div>

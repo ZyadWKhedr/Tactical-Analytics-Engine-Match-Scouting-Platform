@@ -6,25 +6,91 @@ import { AlertCircle, ChevronRight, Scale, ShieldAlert, Swords, Trophy, Zap } fr
 
 interface Props {
   teams: TeamSummary[];
+  teamA?: number;
+  teamB?: number;
+  onSelectTeamA?: (teamId: number) => void;
+  onSelectTeamB?: (teamId: number) => void;
   defaultTeamA?: number;
   defaultTeamB?: number;
 }
 
-export const MatchupView: React.FC<Props> = ({ teams, defaultTeamA, defaultTeamB }) => {
-  const [teamA, setTeamA] = useState<number>(defaultTeamA || (teams[0] ? teams[0].team.team_id : 1613));
-  const [teamB, setTeamB] = useState<number>(defaultTeamB || (teams[1] ? teams[1].team.team_id : 1659));
+export const MatchupView: React.FC<Props> = ({
+  teams,
+  teamA: propTeamA,
+  teamB: propTeamB,
+  onSelectTeamA,
+  onSelectTeamB,
+  defaultTeamA,
+  defaultTeamB,
+}) => {
+  const [localTeamA, setLocalTeamA] = useState<number>(
+    propTeamA ?? defaultTeamA ?? (teams[0] ? teams[0].team.team_id : 1613)
+  );
+  const [localTeamB, setLocalTeamB] = useState<number>(
+    propTeamB ?? defaultTeamB ?? (teams[1] ? teams[1].team.team_id : 1659)
+  );
   const [matchup, setMatchup] = useState<MatchupOut | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
+  const activeTeamA = propTeamA ?? localTeamA;
+  const activeTeamB = propTeamB ?? localTeamB;
+
+  // Safety guard: ensure activeTeamA and activeTeamB never collide on identical clubs
   useEffect(() => {
-    if (teamA && teamB) {
+    if (activeTeamA === activeTeamB && teams.length > 1) {
+      const fallback = teams.find((t) => t.team.team_id !== activeTeamA);
+      if (fallback) {
+        if (onSelectTeamB) {
+          onSelectTeamB(fallback.team.team_id);
+        } else {
+          setLocalTeamB(fallback.team.team_id);
+        }
+      }
+    }
+  }, [activeTeamA, activeTeamB, teams, onSelectTeamB]);
+
+  const handleSetTeamA = (newA: number) => {
+    if (newA === activeTeamB) {
+      if (onSelectTeamB) onSelectTeamB(activeTeamA);
+      else setLocalTeamB(activeTeamA);
+    }
+    if (onSelectTeamA) onSelectTeamA(newA);
+    else setLocalTeamA(newA);
+  };
+
+  const handleSetTeamB = (newB: number) => {
+    if (newB === activeTeamA) {
+      if (onSelectTeamA) onSelectTeamA(activeTeamB);
+      else setLocalTeamA(activeTeamB);
+    }
+    if (onSelectTeamB) onSelectTeamB(newB);
+    else setLocalTeamB(newB);
+  };
+
+  const handleSwap = () => {
+    if (onSelectTeamA && onSelectTeamB) {
+      onSelectTeamA(activeTeamB);
+      onSelectTeamB(activeTeamA);
+    } else {
+      const oldA = activeTeamA;
+      setLocalTeamA(activeTeamB);
+      setLocalTeamB(oldA);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTeamA && activeTeamB && activeTeamA !== activeTeamB) {
       setLoading(true);
-      api.getMatchup(teamA, teamB)
+      api.getMatchup(activeTeamA, activeTeamB)
         .then((data) => setMatchup(data))
         .catch((err) => console.error(err))
         .finally(() => setLoading(false));
     }
-  }, [teamA, teamB]);
+  }, [activeTeamA, activeTeamB]);
+
+  const sortedTeams = [...teams].sort((a, b) =>
+    a.team.name.localeCompare(b.team.name)
+  );
 
   return (
     <div className="view-container">
@@ -36,31 +102,48 @@ export const MatchupView: React.FC<Props> = ({ teams, defaultTeamA, defaultTeamB
           </p>
         </div>
         <div className="controls-row">
-          <select
-            className="select-input select-large"
-            value={teamA}
-            onChange={(e) => setTeamA(Number(e.target.value))}
-          >
-            {teams.map((t) => (
-              <option key={`a-${t.team.team_id}`} value={t.team.team_id}>
-                Team A: {t.team.name}
-              </option>
-            ))}
-          </select>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#94a3b8', whiteSpace: 'nowrap' }}>
+              Team A:
+            </span>
+            <select
+              className="select-input select-large"
+              value={activeTeamA}
+              onChange={(e) => handleSetTeamA(Number(e.target.value))}
+            >
+              {sortedTeams.map((t) => (
+                <option key={`a-${t.team.team_id}`} value={t.team.team_id}>
+                  {t.team.name}
+                </option>
+              ))}
+            </select>
+          </div>
 
-          <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#94a3b8' }}>VS</span>
-
-          <select
-            className="select-input select-large"
-            value={teamB}
-            onChange={(e) => setTeamB(Number(e.target.value))}
+          <button
+            type="button"
+            className="btn-swap-teams"
+            onClick={handleSwap}
+            title="Swap Teams (Team A ⇄ Team B)"
           >
-            {teams.map((t) => (
-              <option key={`b-${t.team.team_id}`} value={t.team.team_id}>
-                Team B: {t.team.name}
-              </option>
-            ))}
-          </select>
+            ⇄
+          </button>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#94a3b8', whiteSpace: 'nowrap' }}>
+              Team B:
+            </span>
+            <select
+              className="select-input select-large"
+              value={activeTeamB}
+              onChange={(e) => handleSetTeamB(Number(e.target.value))}
+            >
+              {sortedTeams.map((t) => (
+                <option key={`b-${t.team.team_id}`} value={t.team.team_id}>
+                  {t.team.name}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 

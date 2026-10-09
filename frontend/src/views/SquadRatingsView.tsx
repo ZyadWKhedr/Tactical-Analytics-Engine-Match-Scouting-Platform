@@ -20,7 +20,7 @@ export const SquadRatingsView: React.FC<Props> = ({ competitions, onSelectTeam }
       .then((data) => setSquads(data))
       .catch((err) => console.error(err))
       .finally(() => setLoading(false));
-  }, [selectedComp]);
+  }, [selectedComp, competitions]);
 
   const sortedSquads = [...squads].sort((a, b) => {
     if (sortBy === 'attack') return b.attack_rating - a.attack_rating;

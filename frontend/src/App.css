@@ -46,6 +46,12 @@ body {
 .sidebar-header {
   padding: 24px 20px;
   border-bottom: 1px solid var(--border-card);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.sidebar-header:hover {
+  background-color: rgba(255, 255, 255, 0.03);
 }
 
 .brand-title {
@@ -123,6 +129,18 @@ body {
   border-radius: 50%;
   background-color: var(--accent-green);
   box-shadow: 0 0 8px var(--accent-green);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.status-dot.dot-red {
+  background-color: #ef4444;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.8);
+  animation: pulse-red 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse-red {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.9); }
 }
 
 /* Main Content Area */
@@ -385,6 +403,8 @@ body {
 }
 
 .tag-pill {
+  display: inline-block;
+  white-space: nowrap;
   background: rgba(255, 255, 255, 0.06);
   color: #cbd5e1;
   padding: 3px 8px;
@@ -728,11 +748,88 @@ body {
 }
 
 .verdict-pill {
+  display: inline-block;
+  white-space: nowrap;
   padding: 3px 8px;
   border-radius: 4px;
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: capitalize;
+}
+
+/* Match Shot Inspector Roster Table */
+.shot-roster-container {
+  margin-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 14px;
+}
+
+.shot-roster-table {
+  max-height: 260px;
+  overflow-y: auto;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.shot-roster-table thead th {
+  position: sticky;
+  top: 0;
+  background-color: #0b1322;
+  z-index: 3;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.shot-row-selected {
+  background-color: rgba(56, 189, 248, 0.18) !important;
+  border-left: 3px solid #38bdf8;
+}
+
+.btn-swap-teams {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #94a3b8;
+  cursor: pointer;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-swap-teams:hover {
+  background: rgba(56, 189, 248, 0.15);
+  border-color: #38bdf8;
+  color: #38bdf8;
+  transform: rotate(180deg);
+}
+
+.btn-toggle-zoom {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #cbd5e1;
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.btn-toggle-zoom:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+.btn-toggle-zoom.active {
+  background: rgba(56, 189, 248, 0.2);
+  border-color: #38bdf8;
+  color: #38bdf8;
 }
 
 .verdict-green { background: rgba(34, 197, 94, 0.15); color: var(--accent-green); }

@@ -103,9 +103,9 @@ export const PassingNetworkView: React.FC<Props> = ({ teams, selectedTeamId }) =
         </div>
       </div>
 
-      <div className="split-columns">
+      <div className="split-columns" style={{ alignItems: 'start' }}>
         {/* Pitch Network Visualizer */}
-        <div className="card">
+        <div className="card" style={{ height: 'fit-content' }}>
           <div className="card-header-flex">
             <div>
               <h3 className="section-title">

@@ -60,6 +60,19 @@ from backend.app.schemas import (
 log = logging.getLogger(__name__)
 
 
+def clean_text(s: Any) -> str:
+    """Decodes escaped unicode sequences from raw feeds (e.g. Lionel Andr\\u00e9s -> Lionel Andrés)."""
+    if s is None:
+        return ""
+    import re
+    val = str(s).strip()
+    try:
+        val = re.sub(r'\\u([0-9a-fA-F]{4})', lambda m: chr(int(m.group(1), 16)), val)
+    except Exception:
+        pass
+    return val
+
+
 class DataRepository:
     """Singleton repository caching parquet/json models and querying PostgreSQL."""
 
@@ -116,11 +129,11 @@ class DataRepository:
         return {
             r.team_id: {
                 "team_id": r.team_id,
-                "name": r.team_name,
-                "country": r.country,
+                "name": clean_text(r.team_name),
+                "country": clean_text(r.country),
                 "team_type": r.team_type,
-                "city": r.city,
-                "official_name": r.official_name,
+                "city": clean_text(r.city),
+                "official_name": clean_text(r.official_name),
             }
             for r in rows
         }
@@ -134,8 +147,8 @@ class DataRepository:
         return {
             r.player_id: {
                 "player_id": r.player_id,
-                "name": r.short_name,
-                "role_name": r.role_name,
+                "name": clean_text(r.short_name),
+                "role_name": clean_text(r.role_name),
                 "current_team_id": r.current_team_id,
             }
             for r in rows
@@ -441,7 +454,7 @@ class DataRepository:
                 {"pid": player_id},
             ).fetchone()
 
-        full_name = f"{p.first_name or ''} {p.last_name or ''}".strip() or p.short_name
+        full_name = clean_text(f"{p.first_name or ''} {p.last_name or ''}".strip() or p.short_name)
 
         rating_item: PlayerRatingOut | None = None
         if not self.player_ratings_df.empty:

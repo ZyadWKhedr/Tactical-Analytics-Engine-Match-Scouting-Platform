@@ -14,6 +14,8 @@ export const XgView: React.FC<Props> = ({ teams, selectedTeamId, onSelectTeamId 
   const [teamXg, setTeamXg] = useState<TeamXgOut | null>(null);
   const [selectedMatchId, setSelectedMatchId] = useState<number | null>(null);
   const [matchShots, setMatchShots] = useState<ShotOut[] | null>(null);
+  const [selectedShotActionId, setSelectedShotActionId] = useState<number | null>(null);
+  const [zoomBox, setZoomBox] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -23,6 +25,7 @@ export const XgView: React.FC<Props> = ({ teams, selectedTeamId, onSelectTeamId 
         setTeamXg(data);
         if (data.timeline.length > 0) {
           setSelectedMatchId(data.timeline[0].match_id);
+          setSelectedShotActionId(null);
         }
       })
       .catch((err) => console.error(err))
@@ -31,6 +34,7 @@ export const XgView: React.FC<Props> = ({ teams, selectedTeamId, onSelectTeamId 
 
   useEffect(() => {
     if (selectedMatchId) {
+      setSelectedShotActionId(null);
       api.getMatchShots(selectedMatchId)
         .then((shots) => setMatchShots(shots))
         .catch((err) => console.error(err));
@@ -108,14 +112,29 @@ export const XgView: React.FC<Props> = ({ teams, selectedTeamId, onSelectTeamId 
                     Select a fixture below to inspect all individual shots, visible angles, and assist origins.
                   </p>
                 </div>
-                {selectedMatchId && (
-                  <span className="tag-pill">
-                    {matchShots ? `${matchShots.length} shots recorded` : 'Loading shots...'}
-                  </span>
-                )}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <button
+                    type="button"
+                    className={`btn-toggle-zoom ${zoomBox ? 'active' : ''}`}
+                    onClick={() => setZoomBox(!zoomBox)}
+                    title="Toggle 2.5x zoom into attacking penalty area"
+                  >
+                    {zoomBox ? '🔍 Full Pitch' : '🎯 Box Zoom (2.5x)'}
+                  </button>
+                  {selectedMatchId && (
+                    <span className="tag-pill">
+                      {matchShots ? `${matchShots.length} shots recorded` : 'Loading shots...'}
+                    </span>
+                  )}
+                </div>
               </div>
 
-              <Pitch shots={matchShots} />
+              <Pitch
+                shots={matchShots}
+                zoomBox={zoomBox}
+                selectedShotActionId={selectedShotActionId}
+                onSelectShot={(sh) => setSelectedShotActionId(sh ? sh.action_id : null)}
+              />
 
               <div className="shot-legend">
                 <div className="legend-item">
@@ -128,6 +147,74 @@ export const XgView: React.FC<Props> = ({ teams, selectedTeamId, onSelectTeamId 
                   <span className="legend-circle-small" /> Bubble size = xG probability
                 </div>
               </div>
+
+              {/* Accessible Match Shot Roster Table */}
+              {matchShots && matchShots.length > 0 && (
+                <div className="shot-roster-container">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                    <h4 style={{ margin: 0, fontSize: '0.85rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      Fixture Shot Log ({matchShots.length} attempts)
+                    </h4>
+                    {selectedShotActionId && (
+                      <button
+                        type="button"
+                        style={{ background: 'none', border: 'none', color: '#38bdf8', fontSize: '0.78rem', cursor: 'pointer' }}
+                        onClick={() => setSelectedShotActionId(null)}
+                      >
+                        Clear selection
+                      </button>
+                    )}
+                  </div>
+                  <div className="shot-roster-table">
+                    <table className="custom-table" style={{ fontSize: '0.82rem' }}>
+                      <thead>
+                        <tr>
+                          <th>Min</th>
+                          <th>Shooter</th>
+                          <th>Outcome</th>
+                          <th>xG</th>
+                          <th>Delivery / Body</th>
+                          <th>Assist By</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {[...matchShots]
+                          .sort((a, b) => a.minute - b.minute)
+                          .map((sh) => {
+                            const isSelected = selectedShotActionId === sh.action_id;
+                            return (
+                              <tr
+                                key={sh.action_id}
+                                className={`table-row-hover ${isSelected ? 'shot-row-selected' : ''}`}
+                                style={{ cursor: 'pointer' }}
+                                onClick={() => setSelectedShotActionId(isSelected ? null : sh.action_id)}
+                              >
+                                <td className="font-semibold">{sh.minute}'</td>
+                                <td>{sh.player.name}</td>
+                                <td>
+                                  <span
+                                    className="tag-pill"
+                                    style={{
+                                      backgroundColor: sh.is_goal ? 'rgba(34, 197, 94, 0.2)' : 'rgba(56, 189, 248, 0.15)',
+                                      color: sh.is_goal ? '#4ade80' : '#38bdf8',
+                                    }}
+                                  >
+                                    {sh.is_goal ? 'Goal ⚽' : 'Shot 🎯'}
+                                  </span>
+                                </td>
+                                <td className="font-semibold">{sh.xg.toFixed(2)}</td>
+                                <td style={{ textTransform: 'capitalize' }}>
+                                  {sh.bodypart || sh.shot_type || '—'}
+                                </td>
+                                <td>{sh.assister?.name || '—'}</td>
+                              </tr>
+                            );
+                          })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Top Individual Finishers & Creators */}

@@ -22,7 +22,7 @@ export const RadarChart: React.FC<RadarChartProps> = ({
   if (!data || data.length < 3) return null;
 
   const center = size / 2;
-  const radius = size * 0.38;
+  const radius = size * 0.33;
   const n = data.length;
   const angleStep = (2 * Math.PI) / n;
 
@@ -32,7 +32,17 @@ export const RadarChart: React.FC<RadarChartProps> = ({
   // Coordinates for a value at given index
   const getCoords = (val: number, idx: number) => {
     const angle = idx * angleStep - Math.PI / 2;
-    const r = (val / 100) * radius;
+    const clampedVal = Math.max(0, Math.min(100, val));
+    const r = (clampedVal / 100) * radius;
+    return {
+      x: center + r * Math.cos(angle),
+      y: center + r * Math.sin(angle),
+    };
+  };
+
+  const getLabelCoords = (idx: number) => {
+    const angle = idx * angleStep - Math.PI / 2;
+    const r = radius * 1.25;
     return {
       x: center + r * Math.cos(angle),
       y: center + r * Math.sin(angle),
@@ -44,9 +54,20 @@ export const RadarChart: React.FC<RadarChartProps> = ({
     return `${pt.x},${pt.y}`;
   }).join(' ');
 
+  // SVG margins so long labels never clip
+  const padX = 85;
+  const padY = 35;
+  const vbWidth = size + 2 * padX;
+  const vbHeight = size + 2 * padY;
+
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', overflow: 'visible' }}>
+      <svg
+        width={vbWidth}
+        height={vbHeight}
+        viewBox={`-${padX} -${padY} ${vbWidth} ${vbHeight}`}
+        style={{ overflow: 'visible', maxWidth: '100%' }}
+      >
         {/* Background web levels */}
         {levels.map((lvl) => {
           const pts = Array.from({ length: n })
@@ -60,7 +81,7 @@ export const RadarChart: React.FC<RadarChartProps> = ({
               key={`lvl-${lvl}`}
               points={pts}
               fill="none"
-              stroke="rgba(255, 255, 255, 0.1)"
+              stroke="rgba(255, 255, 255, 0.12)"
               strokeWidth={lvl === 100 ? 1.5 : 0.8}
             />
           );
@@ -76,7 +97,7 @@ export const RadarChart: React.FC<RadarChartProps> = ({
               y1={center}
               x2={pt.x}
               y2={pt.y}
-              stroke="rgba(255, 255, 255, 0.12)"
+              stroke="rgba(255, 255, 255, 0.15)"
               strokeWidth={1}
             />
           );
@@ -87,7 +108,7 @@ export const RadarChart: React.FC<RadarChartProps> = ({
           points={polygonPoints}
           fill={fillColor}
           stroke={color}
-          strokeWidth={2.2}
+          strokeWidth={2.4}
           strokeLinejoin="round"
         />
 
@@ -99,19 +120,19 @@ export const RadarChart: React.FC<RadarChartProps> = ({
               key={`dot-${i}`}
               cx={pt.x}
               cy={pt.y}
-              r={3.5}
+              r={3.8}
               fill={color}
               stroke="#ffffff"
-              strokeWidth={1}
+              strokeWidth={1.2}
             />
           );
         })}
 
-        {/* Labels */}
+        {/* Metric Labels with full width clearance */}
         {data.map((d, i) => {
-          const pt = getCoords(118, i);
-          const isLeft = pt.x < center - 10;
-          const isRight = pt.x > center + 10;
+          const pt = getLabelCoords(i);
+          const isLeft = pt.x < center - 15;
+          const isRight = pt.x > center + 15;
           return (
             <text
               key={`lbl-${i}`}
@@ -119,10 +140,10 @@ export const RadarChart: React.FC<RadarChartProps> = ({
               y={pt.y + 4}
               textAnchor={isLeft ? 'end' : isRight ? 'start' : 'middle'}
               fill="#cbd5e1"
-              fontSize={11}
+              fontSize={11.5}
               fontWeight={500}
             >
-              {d.label} ({d.value.toFixed(0)})
+              {d.label} ({Math.round(d.value)})
             </text>
           );
         })}

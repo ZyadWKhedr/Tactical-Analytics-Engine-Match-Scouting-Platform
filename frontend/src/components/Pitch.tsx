@@ -8,6 +8,9 @@ interface PitchProps {
   heatmap?: HeatmapOut | null;
   passingNetwork?: PassingNetworkOut | null;
   shots?: ShotOut[] | null;
+  selectedShotActionId?: number | null;
+  onSelectShot?: (shot: ShotOut | null) => void;
+  zoomBox?: boolean;
   width?: number | string;
   height?: number | string;
   showCoordinates?: boolean;
@@ -20,14 +23,21 @@ export const Pitch: React.FC<PitchProps> = ({
   heatmap,
   passingNetwork,
   shots,
+  selectedShotActionId,
+  onSelectShot,
+  zoomBox = false,
   width = '100%',
   height = 'auto',
 }) => {
   const [hoveredInfo, setHoveredInfo] = useState<string | null>(null);
+  const [hoveredCell, setHoveredCell] = useState<{ ix: number; iy: number } | null>(null);
 
   // Pitch constants: 105m x 68m
   const W = 105;
   const H = 68;
+
+  // ViewBox: Full pitch (-4 -4 113 76) vs Attacking Third / Penalty Box zoom (48 6 58 56)
+  const pitchViewBox = zoomBox ? '48 6 58 56' : `-4 -4 ${W + 8} ${H + 8}`;
 
   // Helper color for vulnerability index (0 to 100)
   const getVulnColor = (idx: number) => {
@@ -41,7 +51,7 @@ export const Pitch: React.FC<PitchProps> = ({
   return (
     <div style={{ position: 'relative', width, maxWidth: '900px', margin: '0 auto' }}>
       <svg
-        viewBox={`-4 -4 ${W + 8} ${H + 8}`}
+        viewBox={pitchViewBox}
         style={{
           width: '100%',
           height,
@@ -64,14 +74,41 @@ export const Pitch: React.FC<PitchProps> = ({
 
         {/* ---------------- HEATMAP LAYER ---------------- */}
         {heatmap && heatmap.counts && heatmap.max_count > 0 && (
-          <g opacity={0.75}>
+          <g opacity={0.78}>
             {heatmap.counts.map((row, iy) => {
               const cellH = H / heatmap.ny;
               const y = iy * cellH;
               return row.map((count, ix) => {
-                if (count === 0) return null;
                 const cellW = W / heatmap.nx;
                 const x = ix * cellW;
+                const isHovered = hoveredCell?.ix === ix && hoveredCell?.iy === iy;
+
+                if (count === 0) {
+                  return (
+                    <rect
+                      key={`hm-${ix}-${iy}`}
+                      x={x}
+                      y={y}
+                      width={cellW}
+                      height={cellH}
+                      fill={isHovered ? 'rgba(148, 163, 184, 0.15)' : 'transparent'}
+                      stroke={isHovered ? 'rgba(148, 163, 184, 0.6)' : 'none'}
+                      strokeWidth={0.35}
+                      style={{ cursor: 'pointer', transition: 'stroke 0.1s ease, fill 0.1s ease' }}
+                      onMouseEnter={() => {
+                        setHoveredCell({ ix, iy });
+                        setHoveredInfo(
+                          `Spatial Grid Cell (${(x + cellW / 2).toFixed(1)}m, ${(y + cellH / 2).toFixed(1)}m) • 0 actions recorded (Inactive zone)`
+                        );
+                      }}
+                      onMouseLeave={() => {
+                        setHoveredCell(null);
+                        setHoveredInfo(null);
+                      }}
+                    />
+                  );
+                }
+
                 const intensity = Math.min(count / heatmap.max_count, 1);
                 // Heatmap color interpolation (blue -> yellow -> red)
                 const r = Math.round(255 * intensity);
@@ -84,7 +121,22 @@ export const Pitch: React.FC<PitchProps> = ({
                     y={y}
                     width={cellW}
                     height={cellH}
-                    fill={`rgba(${r}, ${g}, ${b}, ${0.2 + intensity * 0.7})`}
+                    fill={`rgba(${r}, ${g}, ${b}, ${0.25 + intensity * 0.7})`}
+                    stroke={isHovered ? '#ffffff' : 'none'}
+                    strokeWidth={0.35}
+                    style={{ cursor: 'pointer', transition: 'stroke 0.1s ease' }}
+                    onMouseEnter={() => {
+                      setHoveredCell({ ix, iy });
+                      const total = heatmap.n_actions || heatmap.max_count;
+                      const pct = total > 0 ? ((count / total) * 100).toFixed(2) : '—';
+                      setHoveredInfo(
+                        `Spatial Grid Cell (${(x + cellW / 2).toFixed(1)}m, ${(y + cellH / 2).toFixed(1)}m) • ${count.toLocaleString()} actions (${pct}% of volume)`
+                      );
+                    }}
+                    onMouseLeave={() => {
+                      setHoveredCell(null);
+                      setHoveredInfo(null);
+                    }}
                   />
                 );
               });
@@ -143,7 +195,7 @@ export const Pitch: React.FC<PitchProps> = ({
         )}
 
         {/* ---------------- PITCH OUTLINES & MARKINGS ---------------- */}
-        <g stroke="#ffffff" strokeWidth="0.4" fill="none" opacity="0.85">
+        <g stroke="#ffffff" strokeWidth="0.4" fill="none" opacity="0.85" pointerEvents="none" style={{ pointerEvents: 'none' }}>
           {/* Outer Boundary */}
           <rect x="0" y="0" width={W} height={H} />
 
@@ -235,44 +287,63 @@ export const Pitch: React.FC<PitchProps> = ({
         {/* ---------------- SHOT MAP LAYER ---------------- */}
         {shots && (
           <g>
-            {shots.map((sh, idx) => {
-              const r = Math.min(Math.max(Math.sqrt(sh.xg) * 6, 1.2), 5.5);
-              const color = sh.is_goal ? '#22c55e' : '#38bdf8';
-              return (
-                <g
-                  key={`shot-${idx}`}
-                  style={{ cursor: 'pointer' }}
-                  onMouseEnter={() =>
-                    setHoveredInfo(
-                      `${sh.player.name} (${sh.minute}') - xG: ${sh.xg.toFixed(2)} | ${sh.is_goal ? 'GOAL ⚽' : 'Saved/Miss'} | Type: ${sh.shot_type}`
-                    )
-                  }
-                  onMouseLeave={() => setHoveredInfo(null)}
-                >
-                  <circle
-                    cx={sh.x}
-                    cy={sh.y}
-                    r={r}
-                    fill={color}
-                    fillOpacity={sh.is_goal ? 0.9 : 0.6}
-                    stroke="#ffffff"
-                    strokeWidth={sh.is_goal ? 0.6 : 0.2}
-                  />
-                  {sh.is_goal && (
-                    <text
-                      x={sh.x}
-                      y={sh.y + 0.8}
-                      textAnchor="middle"
-                      fill="#ffffff"
-                      fontSize={2.2}
-                      fontWeight="bold"
-                    >
-                      ★
-                    </text>
-                  )}
-                </g>
-              );
-            })}
+            {[...shots]
+              .sort((a, b) => {
+                if (a.action_id === selectedShotActionId) return 1;
+                if (b.action_id === selectedShotActionId) return -1;
+                return b.xg - a.xg; // Paint large bubbles first (bottom), small on top
+              })
+              .map((sh, idx) => {
+                const isSelected = selectedShotActionId === sh.action_id;
+                const r = Math.min(Math.max(Math.sqrt(sh.xg) * 6, 1.2), 5.5);
+                const color = sh.is_goal ? '#22c55e' : '#38bdf8';
+                return (
+                  <g
+                    key={`shot-${sh.action_id || idx}`}
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => onSelectShot?.(isSelected ? null : sh)}
+                    onMouseEnter={() =>
+                      setHoveredInfo(
+                        `${sh.player.name} (${sh.minute}') • xG: ${sh.xg.toFixed(2)} | ${sh.is_goal ? 'GOAL ⚽' : 'Saved/Miss'} | ${sh.bodypart || sh.shot_type || 'Shot'}`
+                      )
+                    }
+                    onMouseLeave={() => setHoveredInfo(null)}
+                  >
+                    {isSelected && (
+                      <circle
+                        cx={sh.x}
+                        cy={sh.y}
+                        r={r + 2.5}
+                        fill="none"
+                        stroke="#fbbf24"
+                        strokeWidth={1.2}
+                        strokeDasharray="2.5 1.5"
+                      />
+                    )}
+                    <circle
+                      cx={sh.x}
+                      cy={sh.y}
+                      r={isSelected ? r + 0.6 : r}
+                      fill={color}
+                      fillOpacity={sh.is_goal ? 0.95 : 0.75}
+                      stroke={isSelected ? '#fbbf24' : '#ffffff'}
+                      strokeWidth={isSelected ? 1.0 : (sh.is_goal ? 0.6 : 0.25)}
+                    />
+                    {sh.is_goal && (
+                      <text
+                        x={sh.x}
+                        y={sh.y + 0.8}
+                        textAnchor="middle"
+                        fill="#ffffff"
+                        fontSize={2.2}
+                        fontWeight="bold"
+                      >
+                        ★
+                      </text>
+                    )}
+                  </g>
+                );
+              })}
           </g>
         )}
       </svg>
@@ -291,7 +362,16 @@ export const Pitch: React.FC<PitchProps> = ({
           border: '1px solid rgba(255,255,255,0.08)',
         }}
       >
-        {hoveredInfo || 'Hover over zones, shots, or player nodes for details'}
+        {hoveredInfo ||
+          (heatmap
+            ? 'Hover over grid cells to inspect spatial event density & volume'
+            : shots
+            ? 'Hover or click shots on the pitch or roster below for xG details'
+            : zones
+            ? 'Hover or click pitch zones to inspect defensive vulnerability'
+            : passingNetwork
+            ? 'Hover over player centroids or passing links for volume details'
+            : 'Hover over pitch elements for details')}
       </div>
     </div>
   );

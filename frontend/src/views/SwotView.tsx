@@ -131,8 +131,8 @@ export const SwotView: React.FC<Props> = ({ teams, selectedTeamId, onSelectTeamI
                 <thead>
                   <tr>
                     <th>Metric</th>
-                    <th>Tactical Phase</th>
-                    <th>Observed Value</th>
+                    <th style={{ whiteSpace: 'nowrap' }}>Tactical Phase</th>
+                    <th style={{ whiteSpace: 'nowrap' }}>Observed Value</th>
                     <th style={{ width: '220px' }}>League Percentile</th>
                     <th>Evaluation Verdict</th>
                     <th>Description</th>
@@ -145,10 +145,10 @@ export const SwotView: React.FC<Props> = ({ teams, selectedTeamId, onSelectTeamI
                     return (
                       <tr key={idx} className="table-row-hover">
                         <td className="font-semibold">{m.label}</td>
-                        <td>
+                        <td style={{ whiteSpace: 'nowrap' }}>
                           <span className="tag-pill">{m.phase}</span>
                         </td>
-                        <td>
+                        <td style={{ whiteSpace: 'nowrap' }}>
                           {m.value !== null && m.value !== undefined
                             ? `${m.value.toFixed(2)} ${m.unit || ''}`
                             : '—'}
