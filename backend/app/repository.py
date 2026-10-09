@@ -12,6 +12,7 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
+import scipy.ndimage
 from sqlalchemy import text
 
 from backend.app.config import get_settings
@@ -71,6 +72,40 @@ def clean_text(s: Any) -> str:
     except Exception:
         pass
     return val
+
+
+def compute_smoothed_density(
+    counts: np.ndarray | list[list[int]] | list[list[float]],
+    sigma: float = 0.0,
+) -> tuple[list[list[float]], float]:
+    """
+    Computes Gaussian-smoothed action density grid normalized to [0, 1]
+    using logarithmic scaling (log1p).
+    This ensures extreme outlier cells (e.g. 370+ goal-kick spikes)
+    do not crush high-volume build-up cells (e.g. 70 actions) into
+    the same visual color level.
+    If sigma == 0, smoothing is disabled (raw counts log-normalized).
+    Handles empty or all-zero grids safely without division by zero.
+    """
+    counts_arr = np.array(counts, dtype=float)
+    if sigma > 0.0:
+        smoothed = scipy.ndimage.gaussian_filter(counts_arr, sigma=float(sigma), mode="constant")
+    else:
+        smoothed = counts_arr.copy()
+
+    nz = smoothed[smoothed > 0]
+    if len(nz) == 0:
+        return np.zeros_like(counts_arr, dtype=float).tolist(), 0.0
+
+    max_val = float(smoothed.max())
+    if max_val <= 0.0:
+        return np.zeros_like(counts_arr, dtype=float).tolist(), 0.0
+
+    log_smoothed = np.log1p(smoothed)
+    log_max = float(np.log1p(max_val))
+    density = log_smoothed / log_max
+
+    return np.round(density, 4).tolist(), round(max_val, 4)
 
 
 class DataRepository:
@@ -1220,10 +1255,18 @@ class DataRepository:
         type_id: int | None = None,
         nx: int = 32,
         ny: int = 24,
+        sigma: float = 0.0,
     ) -> HeatmapOut:
         with self.engine.connect() as conn:
-            query = "SELECT start_x, start_y FROM core.events WHERE 1=1"
-            params: dict[str, Any] = {}
+            query = """
+                SELECT 
+                    LEAST(GREATEST(FLOOR(start_x / (105.0 / :nx))::int, 0), :nx - 1) AS bin_x,
+                    LEAST(GREATEST(FLOOR(start_y / (68.0 / :ny))::int, 0), :ny - 1) AS bin_y,
+                    COUNT(*)::int AS cnt
+                FROM core.events
+                WHERE start_x IS NOT NULL AND start_y IS NOT NULL
+            """
+            params: dict[str, Any] = {"nx": nx, "ny": ny}
             if team_id:
                 query += " AND team_id = :tid"
                 params["tid"] = team_id
@@ -1237,14 +1280,14 @@ class DataRepository:
                 query += " AND type_id = :type_id"
                 params["type_id"] = type_id
 
-            query += " LIMIT 50000"
+            query += " GROUP BY 1, 2"
             rows = conn.execute(text(query), params).fetchall()
 
         grid = np.zeros((ny, nx), dtype=int)
         for r in rows:
-            ix = int(np.clip(np.floor(r.start_x / (105.0 / nx)), 0, nx - 1))
-            iy = int(np.clip(np.floor(r.start_y / (68.0 / ny)), 0, ny - 1))
-            grid[iy, ix] += 1
+            grid[r.bin_y, r.bin_x] = r.cnt
+
+        density, p98_count = compute_smoothed_density(grid, sigma=sigma)
 
         return HeatmapOut(
             nx=nx,
@@ -1253,13 +1296,16 @@ class DataRepository:
             pitch_width=68.0,
             counts=grid.tolist(),
             max_count=int(grid.max()),
-            n_actions=len(rows),
+            n_actions=int(grid.sum()),
             filter={
                 "team_id": team_id,
                 "player_id": player_id,
                 "match_id": match_id,
                 "type_id": type_id,
             },
+            density=density,
+            sigma=float(sigma),
+            p98_count=p98_count,
         )
 
     # -------------------------------------------------------------------------

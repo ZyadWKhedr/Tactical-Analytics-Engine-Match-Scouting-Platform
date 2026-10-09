@@ -12,6 +12,7 @@ def get_spatial_heatmap(
     type_id: int | None = Query(None, description="Filter actions by SPADL type (e.g. 0=pass, 11=shot, 9=tackle, 18=clearance)"),
     nx: int = Query(32, ge=8, le=64, description="Pitch length grid bins"),
     ny: int = Query(24, ge=6, le=48, description="Pitch width grid bins"),
+    sigma: float = Query(0.0, ge=0.0, le=4.0, description="Gaussian kernel smoothing standard deviation (0 to 4; 0 disables smoothing)"),
     repo: DataRepository = Depends(get_repository),
 ) -> HeatmapOut:
     """
@@ -25,4 +26,5 @@ def get_spatial_heatmap(
         type_id=type_id,
         nx=nx,
         ny=ny,
+        sigma=sigma,
     )

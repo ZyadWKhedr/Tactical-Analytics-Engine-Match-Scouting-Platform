@@ -48,6 +48,30 @@ export const Pitch: React.FC<PitchProps> = ({
     return 'rgba(34, 197, 94, 0.30)'; // green
   };
 
+  // Magma-style colormap matching Notebook 07 (seaborn/matplotlib 'magma')
+  // Gradient: Dark purple -> Magenta / Plum -> Orange -> Pale warm yellow (~0.8 alpha)
+  const getMagmaColor = (level: number, maxLevel = 14) => {
+    const t = Math.max(0, Math.min(1, level / maxLevel));
+    let r: number, g: number, b: number;
+    if (t <= 0.333) {
+      const f = t / 0.333;
+      r = Math.round(20 + f * (130 - 20));
+      g = Math.round(11 + f * (37 - 11));
+      b = Math.round(54 + f * (103 - 54));
+    } else if (t <= 0.666) {
+      const f = (t - 0.333) / 0.333;
+      r = Math.round(130 + f * (245 - 130));
+      g = Math.round(37 + f * (125 - 37));
+      b = Math.round(103 + f * (45 - 103));
+    } else {
+      const f = (t - 0.666) / 0.334;
+      r = Math.round(245 + f * (252 - 245));
+      g = Math.round(125 + f * (253 - 125));
+      b = Math.round(45 + f * (191 - 45));
+    }
+    return `rgba(${r}, ${g}, ${b}, 0.8)`;
+  };
+
   return (
     <div style={{ position: 'relative', width, maxWidth: '900px', margin: '0 auto' }}>
       <svg
@@ -73,8 +97,8 @@ export const Pitch: React.FC<PitchProps> = ({
         <rect x="0" y="0" width={W} height={H} fill="url(#grass-stripes)" />
 
         {/* ---------------- HEATMAP LAYER ---------------- */}
-        {heatmap && heatmap.counts && heatmap.max_count > 0 && (
-          <g opacity={0.78}>
+        {heatmap && heatmap.counts && (
+          <g>
             {heatmap.counts.map((row, iy) => {
               const cellH = H / heatmap.ny;
               const y = iy * cellH;
@@ -82,6 +106,7 @@ export const Pitch: React.FC<PitchProps> = ({
                 const cellW = W / heatmap.nx;
                 const x = ix * cellW;
                 const isHovered = hoveredCell?.ix === ix && hoveredCell?.iy === iy;
+                const cellDensity = heatmap.density?.[iy]?.[ix] ?? (heatmap.max_count > 0 ? count / heatmap.max_count : 0);
 
                 if (count === 0) {
                   return (
@@ -109,11 +134,41 @@ export const Pitch: React.FC<PitchProps> = ({
                   );
                 }
 
-                const intensity = Math.min(count / heatmap.max_count, 1);
-                // Heatmap color interpolation (blue -> yellow -> red)
-                const r = Math.round(255 * intensity);
-                const g = Math.round(255 * (1 - Math.abs(intensity - 0.5) * 2));
-                const b = Math.round(255 * (1 - intensity));
+                const total = heatmap.n_actions || heatmap.max_count;
+                const pct = total > 0 ? ((count / total) * 100).toFixed(2) : '—';
+
+                // Low-density cutoff: cells below 0.05 are transparent (mirrors notebook 07 thresh=0.05)
+                if (cellDensity < 0.05) {
+                  return (
+                    <rect
+                      key={`hm-${ix}-${iy}`}
+                      x={x}
+                      y={y}
+                      width={cellW}
+                      height={cellH}
+                      fill={isHovered ? 'rgba(148, 163, 184, 0.15)' : 'transparent'}
+                      stroke={isHovered ? 'rgba(148, 163, 184, 0.6)' : 'none'}
+                      strokeWidth={0.35}
+                      style={{ cursor: 'pointer', transition: 'stroke 0.1s ease, fill 0.1s ease' }}
+                      onMouseEnter={() => {
+                        setHoveredCell({ ix, iy });
+                        setHoveredInfo(
+                          `Spatial Grid Cell (${(x + cellW / 2).toFixed(1)}m, ${(y + cellH / 2).toFixed(1)}m) • ${count.toLocaleString()} actions (${pct}% of volume)`
+                        );
+                      }}
+                      onMouseLeave={() => {
+                        setHoveredCell(null);
+                        setHoveredInfo(null);
+                      }}
+                    />
+                  );
+                }
+
+                // Quantize log density directly into 15 discrete levels (0..14)
+                // Log1p scaling preserves clear distinction between 70 actions (Fiery Orange) and 370+ (Pale Yellow)
+                const level = Math.min(14, Math.floor(Math.max(0, Math.min(1, cellDensity)) * 15));
+                const fillColor = getMagmaColor(level, 14);
+
                 return (
                   <rect
                     key={`hm-${ix}-${iy}`}
@@ -121,14 +176,12 @@ export const Pitch: React.FC<PitchProps> = ({
                     y={y}
                     width={cellW}
                     height={cellH}
-                    fill={`rgba(${r}, ${g}, ${b}, ${0.25 + intensity * 0.7})`}
+                    fill={fillColor}
                     stroke={isHovered ? '#ffffff' : 'none'}
                     strokeWidth={0.35}
                     style={{ cursor: 'pointer', transition: 'stroke 0.1s ease' }}
                     onMouseEnter={() => {
                       setHoveredCell({ ix, iy });
-                      const total = heatmap.n_actions || heatmap.max_count;
-                      const pct = total > 0 ? ((count / total) * 100).toFixed(2) : '—';
                       setHoveredInfo(
                         `Spatial Grid Cell (${(x + cellW / 2).toFixed(1)}m, ${(y + cellH / 2).toFixed(1)}m) • ${count.toLocaleString()} actions (${pct}% of volume)`
                       );

@@ -23,6 +23,7 @@ export const HeatmapView: React.FC<Props> = ({ teams, selectedTeamId, onSelectTe
       typeId: actionType,
       nx: resolution.nx,
       ny: resolution.ny,
+      sigma: 0,
     })
       .then((data) => setHeatmap(data))
       .catch((err) => console.error(err))

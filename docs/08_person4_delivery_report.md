@@ -122,7 +122,10 @@ The React frontend (`frontend/`) contains 8 dedicated tactical scouting views:
    - Node degree centrality ranking table.
 
 7. **🗺️ Spatial Action Density Heatmaps (`views/HeatmapView.tsx`)**:
-   - 2D spatial action density explorer filterable by action type (passes, shots, duels, clearances, dribbles).
+   - Computes binned 2D spatial action density from `core.events` via in-database SQL aggregation, filterable by action type (passes, shots, duels, clearances, dribbles).
+   - Normalized to [0, 1] using logarithmic (`log1p`) scaling to prevent isolated outlier spikes (such as 370+ goalkeeper distribution spots) from dominating while maintaining clear visual color separation with high-volume build-up zones (~70 actions).
+   - Rendered with a 15-level discrete magma colormap and low-density transparency cutoff ($< 0.05$) to mirror the visual style of Notebook 07.
+   - Interactive hover tooltips display raw atomic action counts and volume percentages from the underlying counts grid alongside precise meter coordinates.
    - Adjustable grid resolution (16×12, 32×24, 48×36).
 
 8. **⚔️ Matchup Simulator (`views/MatchupView.tsx`)**:

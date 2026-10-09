@@ -286,6 +286,9 @@ export interface HeatmapOut {
   max_count: number;
   n_actions: number;
   filter: Record<string, any>;
+  density: number[][];
+  sigma: number;
+  p98_count: number;
 }
 
 export interface NetworkNode {

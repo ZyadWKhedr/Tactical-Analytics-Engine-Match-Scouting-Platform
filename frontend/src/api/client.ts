@@ -66,7 +66,15 @@ export const api = {
   getMatchShots: (matchId: number) => fetchJson<ShotOut[]>(`/matches/${matchId}/shots`),
   getPassingNetwork: (matchId: number, teamId: number, minPasses = 2) =>
     fetchJson<PassingNetworkOut>(`/matches/${matchId}/passing-network?team_id=${teamId}&min_passes=${minPasses}`),
-  getHeatmap: (params?: { teamId?: number; playerId?: number; matchId?: number; typeId?: number; nx?: number; ny?: number }) => {
+  getHeatmap: (params?: {
+    teamId?: number;
+    playerId?: number;
+    matchId?: number;
+    typeId?: number;
+    nx?: number;
+    ny?: number;
+    sigma?: number;
+  }) => {
     const query = new URLSearchParams();
     if (params?.teamId) query.set('team_id', String(params.teamId));
     if (params?.playerId) query.set('player_id', String(params.playerId));
@@ -74,6 +82,7 @@ export const api = {
     if (params?.typeId !== undefined) query.set('type_id', String(params.typeId));
     if (params?.nx) query.set('nx', String(params.nx));
     if (params?.ny) query.set('ny', String(params.ny));
+    if (params?.sigma !== undefined) query.set('sigma', String(params.sigma));
     return fetchJson<HeatmapOut>(`/visuals/heatmap?${query.toString()}`);
   },
   getMatchup: (teamA: number, teamB: number) => fetchJson<MatchupOut>(`/matchup?team_a=${teamA}&team_b=${teamB}`),

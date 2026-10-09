@@ -9,6 +9,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from backend.app.main import app
+from backend.app.repository import compute_smoothed_density
 
 client = TestClient(app)
 
@@ -154,6 +155,33 @@ def test_matches_and_detail():
     assert res_shots.status_code == 200
 
 
+def test_compute_smoothed_density_unit():
+    """[No DB / Pure Unit] Standalone helper tests: all-zero grid, single outlier resilience, and sigma=0."""
+    # (1) All-zero grid
+    zero_grid = [[0] * 16 for _ in range(12)]
+    d_zero, p98_zero = compute_smoothed_density(zero_grid, sigma=1.0)
+    assert p98_zero == 0.0
+    assert len(d_zero) == 12 and all(len(row) == 16 for row in d_zero)
+    assert all(all(val == 0.0 for val in row) for row in d_zero)
+
+    # (2) Single outlier cell (outlier spike must not crush all other cells' density to ~0)
+    outlier_grid = [[5.0] * 20 for _ in range(20)]
+    outlier_grid[0][0] = 500.0  # extreme outlier
+    d_outlier, p98_outlier = compute_smoothed_density(outlier_grid, sigma=1.0)
+    assert p98_outlier > 0.0
+    assert d_outlier[0][0] == 1.0  # outlier clipped at 1.0
+    # Crucial: Outlier must NOT push every other cell's density to ~0 (log1p scaling preserves ~40% density)
+    assert d_outlier[10][10] > 0.35
+    assert all(all(0.0 <= val <= 1.0 for val in row) for row in d_outlier)
+
+    # (3) sigma=0 disables smoothing (derived directly from unsmoothed counts normalized to p98)
+    raw_grid = [[0.0, 10.0], [20.0, 50.0]]
+    d_raw, p98_raw = compute_smoothed_density(raw_grid, sigma=0.0)
+    assert p98_raw > 0.0
+    assert d_raw[0][0] == 0.0
+    assert d_raw[1][1] == 1.0
+
+
 def test_passing_network_and_heatmap():
     """[Database Required] Directed passing network graph and spatial action density."""
     # 2500089: match between 1646 and 1659
@@ -170,6 +198,38 @@ def test_passing_network_and_heatmap():
     assert hm["ny"] == 12
     assert len(hm["counts"]) == 12
     assert len(hm["counts"][0]) == 16
+    assert len(hm["density"]) == 12
+    assert len(hm["density"][0]) == 16
+
+
+def test_heatmap_density_contract_and_smoothing():
+    """[Database Required] Heatmap returns density [ny][nx] in [0, 1], and raw counts sum to n_actions."""
+    res = client.get("/api/v1/visuals/heatmap?team_id=1659&nx=16&ny=12&sigma=1.0")
+    assert res.status_code == 200
+    hm = res.json()
+    assert hm["nx"] == 16
+    assert hm["ny"] == 12
+    # Density grid shape [ny][nx] and bounds in [0, 1]
+    assert len(hm["density"]) == 12
+    assert all(len(row) == 16 for row in hm["density"])
+    assert all(all(0.0 <= val <= 1.0 for val in row) for row in hm["density"])
+    # Raw counts still sum to total binned n_actions
+    assert sum(sum(row) for row in hm["counts"]) == hm["n_actions"]
+    assert hm["n_actions"] > 0
+    assert hm["sigma"] == 1.0
+    assert hm["p98_count"] > 0.0
+
+
+def test_heatmap_sigma_zero_unsmoothed():
+    """[Database Required] sigma=0 returns density derived from the unsmoothed counts."""
+    res = client.get("/api/v1/visuals/heatmap?team_id=1659&nx=16&ny=12&sigma=0")
+    assert res.status_code == 200
+    hm = res.json()
+    assert hm["sigma"] == 0.0
+    assert len(hm["density"]) == 12
+    assert all(len(row) == 16 for row in hm["density"])
+    assert all(all(0.0 <= val <= 1.0 for val in row) for row in hm["density"])
+    assert sum(sum(row) for row in hm["counts"]) == hm["n_actions"]
 
 
 def test_matchup_simulator():
@@ -214,9 +274,13 @@ def test_heatmap_empty_filter_zero_grid():
     assert data["ny"] == 12
     assert data["n_actions"] == 0
     assert data["max_count"] == 0
+    assert data["p98_count"] == 0.0
     assert len(data["counts"]) == 12
     assert all(len(row) == 16 for row in data["counts"])
     assert all(all(val == 0 for val in row) for row in data["counts"])
+    assert len(data["density"]) == 12
+    assert all(len(row) == 16 for row in data["density"])
+    assert all(all(val == 0.0 for val in row) for row in data["density"])
 
 
 def test_invalid_query_params_422():
@@ -231,6 +295,13 @@ def test_invalid_query_params_422():
     # ny out of allowed range [6, 48]
     res_ny_high = client.get("/api/v1/visuals/heatmap?ny=100")
     assert res_ny_high.status_code == 422
+
+    # sigma out of allowed range [0, 4]
+    res_sigma_low = client.get("/api/v1/visuals/heatmap?sigma=-1.0")
+    assert res_sigma_low.status_code == 422
+
+    res_sigma_high = client.get("/api/v1/visuals/heatmap?sigma=5.0")
+    assert res_sigma_high.status_code == 422
 
     # matches limit out of allowed range [1, 200]
     res_limit = client.get("/api/v1/matches?limit=0")

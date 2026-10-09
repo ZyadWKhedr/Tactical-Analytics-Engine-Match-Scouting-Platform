@@ -348,6 +348,9 @@ class HeatmapOut(BaseModel):
     max_count: int
     n_actions: int
     filter: dict
+    density: list[list[float]] = Field(default_factory=list, description="Smoothed and p98-normalized density grid [ny][nx], in [0, 1]")
+    sigma: float = Field(default=0.0, description="Gaussian filter standard deviation used for density surface")
+    p98_count: float = Field(default=0.0, description="98th percentile count value used as density normalization ceiling")
 
 
 class NetworkNode(BaseModel):
