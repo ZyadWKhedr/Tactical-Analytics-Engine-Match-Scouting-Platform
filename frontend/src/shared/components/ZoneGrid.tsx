@@ -5,17 +5,26 @@ import { getVulnerabilityColor } from '../lib/colors';
 import type { ZoneCell, ZonesOut } from '../../api/types';
 
 interface ZoneGridProps {
-  data: ZonesOut;
+  data?: ZonesOut | null;
   className?: string;
   selectedZoneId?: number;
   onSelectZone?: (zone: ZoneCell) => void;
+  isLoading?: boolean;
 }
 
-export function ZoneGrid({ data, className, selectedZoneId, onSelectZone }: ZoneGridProps) {
+export function ZoneGrid({ data, className, selectedZoneId, onSelectZone, isLoading }: ZoneGridProps) {
   const [hoveredCell, setHoveredCell] = useState<ZoneCell | null>(null);
 
   const bandWidth = 105 / 6; // 17.5m
   const channelHeight = 68 / 5; // 13.6m
+
+  if (isLoading || !data || !data.grid) {
+    return (
+      <div className="flex items-center justify-center p-12 text-2xs font-mono text-ink-3">
+        Loading 6×5 Pitch Zone Vulnerability Matrix...
+      </div>
+    );
+  }
 
   const maxVuln = Math.max(0.01, ...data.grid.map((c) => c.vulnerability_index));
 

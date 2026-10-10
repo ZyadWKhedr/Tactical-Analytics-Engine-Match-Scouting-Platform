@@ -4,24 +4,34 @@ import { formatNumber } from '../lib/utils';
 import type { ShotOut } from '../../api/types';
 
 interface ShotMapProps {
-  shots: ShotOut[];
+  shots?: ShotOut[] | null;
   title?: string;
   teamName?: string;
   className?: string;
   showSummaryBar?: boolean;
+  isLoading?: boolean;
 }
 
 export function ShotMap({
-  shots,
+  shots = [],
   className,
   showSummaryBar = true,
+  isLoading = false,
 }: ShotMapProps) {
   const [hoveredShot, setHoveredShot] = useState<ShotOut | null>(null);
 
-  // Compute metrics
-  const totalShots = shots.length;
-  const goals = shots.filter((s) => s.is_goal).length;
-  const totalXg = shots.reduce((sum, s) => sum + (s.xg || 0), 0);
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-12 text-2xs font-mono text-ink-3">
+        Loading Expected Goals Shot Dispersion...
+      </div>
+    );
+  }
+
+  const validShots = shots || [];
+  const totalShots = validShots.length;
+  const goals = validShots.filter((s) => s.is_goal).length;
+  const totalXg = validShots.reduce((sum, s) => sum + (s.xg || 0), 0);
   const xgPerShot = totalShots > 0 ? totalXg / totalShots : 0;
 
   return (
@@ -62,7 +72,7 @@ export function ShotMap({
         <PitchCanvas className={className} showThirds showHalfSpaces>
           {/* Shot glyphs */}
           <g>
-            {shots.map((shot, idx) => {
+            {validShots.map((shot, idx) => {
               // Scale radius by square root of xG (area proportional to expected goal probability)
               const radius = Math.max(0.8, Math.min(4.5, Math.sqrt(shot.xg || 0.05) * 3.6));
               const isGoal = shot.is_goal;
@@ -82,7 +92,7 @@ export function ShotMap({
                         cy={shot.y}
                         r={radius + 1.2}
                         fill="none"
-                        stroke="#10b981"
+                        stroke="var(--accent)"
                         strokeWidth="0.4"
                         opacity="0.8"
                       />
@@ -91,8 +101,8 @@ export function ShotMap({
                         cx={shot.x}
                         cy={shot.y}
                         r={radius}
-                        fill="#10b981"
-                        stroke="#064e3b"
+                        fill="var(--accent)"
+                        stroke="var(--ink)"
                         strokeWidth="0.3"
                       />
                     </>

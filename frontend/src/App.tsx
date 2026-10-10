@@ -6,6 +6,8 @@ import { OpponentReportPage } from './features/opponent/OpponentReportPage';
 import { SquadRatingsPage } from './features/squad/SquadRatingsPage';
 import { PlayerScoutingPage } from './features/players/PlayerScoutingPage';
 import { MatchupSimulatorPage } from './features/matchup/MatchupSimulatorPage';
+import { SettingsPage } from './features/settings/SettingsPage';
+import { StyleGuidePage } from './features/styleguide/StyleGuidePage';
 import { ErrorBoundary } from './shared/components/ErrorBoundary';
 import { useUrlState } from './shared/lib/useUrlState';
 
@@ -84,6 +86,14 @@ function DashboardApp() {
           onSelectTeamA={setSelectedTeamId}
           onSelectTeamB={setMatchupTeamB}
         />
+      )}
+
+      {activeTab === 'settings' && (
+        <SettingsPage onNavigateToStyleGuide={() => setActiveTab('styleguide')} />
+      )}
+
+      {activeTab === 'styleguide' && (
+        <StyleGuidePage />
       )}
     </AppShell>
   );

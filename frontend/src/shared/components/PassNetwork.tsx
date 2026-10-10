@@ -4,12 +4,21 @@ import { formatNumber } from '../lib/utils';
 import type { PassingNetworkOut } from '../../api/types';
 
 interface PassNetworkProps {
-  data: PassingNetworkOut;
+  data?: PassingNetworkOut | null;
   className?: string;
+  isLoading?: boolean;
 }
 
-export function PassNetwork({ data, className }: PassNetworkProps) {
+export function PassNetwork({ data, className, isLoading }: PassNetworkProps) {
   const [hoveredPlayerId, setHoveredPlayerId] = useState<number | null>(null);
+
+  if (isLoading || !data || !data.nodes) {
+    return (
+      <div className="flex items-center justify-center p-12 text-2xs font-mono text-ink-3">
+        Loading Passing Topology & Spatial Node Distribution...
+      </div>
+    );
+  }
 
   const nodeMap = new Map(data.nodes.map((n) => [n.player.player_id, n]));
 

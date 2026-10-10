@@ -5,9 +5,11 @@ import {
   Users,
   Award,
   Swords,
-  Layers,
+  Settings as SettingsIcon,
+  BookOpen,
   ChevronLeft,
   ChevronRight,
+  Shield,
 } from 'lucide-react';
 import { FilterBar } from '../../shared/components/FilterBar';
 import { GlobalSearch } from '../../shared/components/GlobalSearch';
@@ -15,7 +17,7 @@ import { useMetaQuery, useTeamsQuery } from '../../shared/api/queries';
 import { useI18n } from '../../shared/i18n';
 import { formatInt } from '../../shared/lib/utils';
 
-export type NavTab = 'home' | 'opponent' | 'squads' | 'players' | 'matchup';
+export type NavTab = 'home' | 'opponent' | 'squads' | 'players' | 'matchup' | 'settings' | 'styleguide';
 
 interface AppShellProps {
   activeTab: NavTab;
@@ -40,7 +42,7 @@ export function AppShell({
   const [isCollapsed, setIsCollapsed] = useState(false);
   const { data: meta } = useMetaQuery();
   const { data: teams } = useTeamsQuery(selectedCompetitionId);
-  const { t } = useI18n();
+  const { t, language } = useI18n();
 
   const navItems: { id: NavTab; label: string; icon: React.ElementType }[] = [
     { id: 'home', label: t.executiveHome, icon: LayoutDashboard },
@@ -48,33 +50,35 @@ export function AppShell({
     { id: 'squads', label: t.squadRatings, icon: Award },
     { id: 'players', label: t.playerScouting, icon: Users },
     { id: 'matchup', label: t.matchupSimulator, icon: Swords },
+    { id: 'settings', label: t.settings, icon: SettingsIcon },
+    { id: 'styleguide', label: t.styleGuide, icon: BookOpen },
   ];
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-background text-foreground font-sans">
-      {/* Tactical Navigation Sidebar (Collapsible & Responsive) */}
+    <div className="flex h-screen w-screen overflow-hidden bg-bg text-ink font-sans">
+      {/* Tactical Navigation Sidebar (Collapsible & Editorial) */}
       <aside
-        className={`shrink-0 border-r border-border bg-card flex flex-col justify-between select-none transition-all duration-200 z-40 ${
-          isCollapsed ? 'w-16' : 'w-56 sm:w-60'
+        className={`shrink-0 border-e border-rule bg-bg-raised flex flex-col justify-between select-none transition-all duration-200 z-40 ${
+          isCollapsed ? 'w-16' : 'w-60 sm:w-64'
         }`}
       >
-        <div>
+        <div className="flex flex-col h-full">
           {/* Header Brand */}
-          <div className="h-14 px-3 border-b border-border flex items-center justify-between gap-2 shrink-0">
+          <div className="h-14 px-3.5 border-b border-rule flex items-center justify-between gap-2 shrink-0 bg-bg-raised">
             <div
               onClick={() => onTabChange('home')}
               className="flex items-center gap-2.5 cursor-pointer hover:opacity-85 transition-opacity min-w-0"
-              title="Tactical OS — Match Intelligence"
+              title="Tactical OS — Football Scouting & Intelligence Archive"
             >
-              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center shrink-0">
-                <Layers className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
+              <div className="w-7 h-7 rounded border border-accent/40 bg-accent/10 flex items-center justify-center shrink-0">
+                <span className="font-serif font-bold text-accent text-sm">T</span>
               </div>
               {!isCollapsed && (
                 <div className="min-w-0 flex flex-col justify-center">
-                  <span className="text-xs font-bold tracking-wider text-foreground font-mono uppercase whitespace-nowrap overflow-hidden text-ellipsis block leading-tight">
+                  <span className="text-sm font-bold font-serif text-ink tracking-tight whitespace-nowrap overflow-hidden text-ellipsis block leading-none">
                     {t.brandName}
                   </span>
-                  <span className="text-[10px] font-mono text-muted-foreground whitespace-nowrap overflow-hidden text-ellipsis block leading-tight mt-0.5">
+                  <span className="text-3xs font-mono text-ink-3 uppercase tracking-wider whitespace-nowrap overflow-hidden text-ellipsis block leading-none mt-1">
                     {t.brandSubtitle}
                   </span>
                 </div>
@@ -84,17 +88,21 @@ export function AppShell({
             {/* Sidebar Collapse Toggle */}
             <button
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className="p-1.5 rounded text-muted-foreground hover:text-foreground hover:bg-surface transition-colors focus:outline-none shrink-0"
+              className="p-1.5 rounded text-ink-3 hover:text-ink hover:bg-bg-sunken transition-colors focus:outline-none shrink-0"
               title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             >
-              {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+              {language === 'ar' ? (
+                isCollapsed ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />
+              ) : (
+                isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />
+              )}
             </button>
           </div>
 
           {/* Navigation Links */}
-          <nav className="p-2 space-y-1">
+          <nav className="p-2 space-y-1 flex-1 overflow-y-auto">
             {!isCollapsed && (
-              <div className="px-2.5 py-1 text-3xs font-semibold uppercase tracking-wider text-muted-foreground font-mono">
+              <div className="px-2.5 py-1.5 text-3xs font-semibold uppercase tracking-widest text-ink-3 font-mono">
                 {t.scoutingModules}
               </div>
             )}
@@ -109,39 +117,39 @@ export function AppShell({
                   title={isCollapsed ? item.label : undefined}
                   className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded text-xs font-medium transition-colors ${
                     isActive
-                      ? 'bg-surface text-emerald-500 dark:text-emerald-400 border border-border font-semibold shadow-xs'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-surface/60'
-                  } ${isCollapsed ? 'justify-center px-0' : ''}`}
+                      ? 'bg-bg-sunken text-accent font-semibold border-s-2 border-accent shadow-2xs'
+                      : 'text-ink-2 hover:text-ink hover:bg-bg-sunken/60'
+                  } ${isCollapsed ? 'justify-center px-0 border-s-0' : ''}`}
                 >
-                  <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-emerald-500 dark:text-emerald-400' : 'text-muted-foreground'}`} />
+                  <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-accent' : 'text-ink-3'}`} />
                   {!isCollapsed && <span className="truncate">{item.label}</span>}
                 </button>
               );
             })}
           </nav>
-        </div>
 
-        {/* Sidebar Footer Context */}
-        {!isCollapsed && (
-          <div className="p-3 border-t border-border text-2xs font-mono text-muted-foreground space-y-1 bg-card/50">
-            <div className="flex justify-between">
-              <span>{t.matches}</span>
-              <span className="text-foreground tabular-nums">{formatInt(meta?.n_matches ?? 1941)}</span>
+          {/* Sidebar Footer Context */}
+          {!isCollapsed && (
+            <div className="p-3.5 border-t border-rule text-2xs font-mono text-ink-3 space-y-1 bg-bg-sunken/40 shrink-0">
+              <div className="flex justify-between">
+                <span>{t.matches}</span>
+                <span className="text-ink tabular-nums font-bold">{formatInt(meta?.n_matches ?? 1941)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>SPADL Corpus</span>
+                <span className="text-ink tabular-nums font-bold">2.46M</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Pitch Surface</span>
+                <span className="text-ink">105×68m</span>
+              </div>
             </div>
-            <div className="flex justify-between">
-              <span>SPADL Events</span>
-              <span className="text-foreground tabular-nums">2.46M</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Pitch Surface</span>
-              <span className="text-foreground">105×68m</span>
-            </div>
-          </div>
-        )}
+          )}
+        </div>
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col h-full overflow-hidden bg-background">
+      <div className="flex-1 flex flex-col h-full overflow-hidden bg-bg">
         <FilterBar
           competitions={meta?.competitions || []}
           teams={teams || []}
@@ -150,9 +158,10 @@ export function AppShell({
           onSelectCompetition={onSelectCompetitionId}
           onSelectTeam={onSelectTeamId}
           onOpenSearch={() => setIsSearchOpen(true)}
+          onOpenSettings={() => onTabChange('settings')}
         />
 
-        <main className="flex-1 overflow-y-auto bg-background/60">
+        <main className="flex-1 overflow-y-auto bg-bg/80">
           {children}
         </main>
       </div>
