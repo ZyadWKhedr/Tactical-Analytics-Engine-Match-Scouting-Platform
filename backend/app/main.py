@@ -74,8 +74,31 @@ def root():
 
 
 @app.get("/health", tags=["Health"])
+@app.get("/api/health", tags=["Health"])
 def health():
-    return {"status": "healthy", "service": "tactical-analytics-api", "version": "1.0.0"}
+    import time
+    from sqlalchemy import text
+    from backend.app.db import get_engine
+
+    t0 = time.perf_counter()
+    db_status = "down"
+    try:
+        engine = get_engine()
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+        db_status = "ok"
+    except Exception as e:
+        log.warning("Healthcheck DB query failed: %s", e)
+        db_status = "down"
+    latency_ms = round((time.perf_counter() - t0) * 1000, 2)
+    return {
+        "api": "ok",
+        "db": db_status,
+        "latencyMs": latency_ms,
+        "status": "healthy" if db_status == "ok" else "degraded",
+        "service": "tactical-analytics-api",
+        "version": "1.0.0",
+    }
 
 
 if __name__ == "__main__":
