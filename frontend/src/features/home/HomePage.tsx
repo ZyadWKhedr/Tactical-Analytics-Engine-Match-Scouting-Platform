@@ -135,7 +135,7 @@ export function HomePage({
                 </div>
                 <h2 className="text-lg font-bold text-zinc-100 mt-1 flex items-center gap-2">
                   <Shield className="w-5 h-5 text-emerald-400" />
-                  {activeTeam?.team.name ?? 'Selected Club'}
+                  {activeTeam?.team?.name ?? 'Selected Club'}
                   <span className="text-xs font-normal text-zinc-400 font-mono">
                     ({activeTeam?.competition_name ?? 'Premier League'})
                   </span>
@@ -155,22 +155,22 @@ export function HomePage({
             <div className="grid grid-cols-3 gap-3 mb-4">
               <div className="p-2.5 rounded bg-zinc-900 border border-zinc-800 text-center">
                 <span className="text-2xs font-mono uppercase text-zinc-500 block">Overall Rating</span>
-                <span className={getRatingColor(activeTeam?.rating.team)}>
-                  {formatNumber(activeTeam?.rating.team, 1)}
+                <span className={getRatingColor(activeTeam?.rating?.team)}>
+                  {formatNumber(activeTeam?.rating?.team, 1)}
                 </span>
                 <span className="text-3xs font-mono text-zinc-500 block">Scale 1-10</span>
               </div>
               <div className="p-2.5 rounded bg-zinc-900 border border-zinc-800 text-center">
                 <span className="text-2xs font-mono uppercase text-zinc-500 block">Attack Power</span>
                 <span className="text-zinc-200 font-mono text-base font-bold">
-                  {formatNumber(activeTeam?.rating.attack, 1)}
+                  {formatNumber(activeTeam?.rating?.attack, 1)}
                 </span>
                 <span className="text-3xs font-mono text-zinc-500 block">Expected Threat</span>
               </div>
               <div className="p-2.5 rounded bg-zinc-900 border border-zinc-800 text-center">
                 <span className="text-2xs font-mono uppercase text-zinc-500 block">Defence Rating</span>
                 <span className="text-zinc-200 font-mono text-base font-bold">
-                  {formatNumber(activeTeam?.rating.defence, 1)}
+                  {formatNumber(activeTeam?.rating?.defence, 1)}
                 </span>
                 <span className="text-3xs font-mono text-zinc-500 block">Zone Resistance</span>
               </div>

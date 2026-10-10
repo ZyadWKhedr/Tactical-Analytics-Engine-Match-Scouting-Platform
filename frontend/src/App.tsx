@@ -6,6 +6,7 @@ import { OpponentReportPage } from './features/opponent/OpponentReportPage';
 import { SquadRatingsPage } from './features/squad/SquadRatingsPage';
 import { PlayerScoutingPage } from './features/players/PlayerScoutingPage';
 import { MatchupSimulatorPage } from './features/matchup/MatchupSimulatorPage';
+import { ErrorBoundary } from './shared/components/ErrorBoundary';
 import { useUrlState } from './shared/lib/useUrlState';
 
 const queryClient = new QueryClient({
@@ -90,9 +91,11 @@ function DashboardApp() {
 
 export function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <DashboardApp />
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <DashboardApp />
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 

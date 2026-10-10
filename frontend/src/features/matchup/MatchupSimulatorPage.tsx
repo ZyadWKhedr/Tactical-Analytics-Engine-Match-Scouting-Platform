@@ -88,9 +88,9 @@ export function MatchupSimulatorPage({
             {/* Rating Comparison Row */}
             <div className="grid grid-cols-3 gap-4 text-center p-4 rounded bg-zinc-950/60 border border-zinc-800">
               <div>
-                <span className="text-2xs font-mono text-zinc-400 block">{matchup.team_a.team.name}</span>
-                <span className={getRatingColor(matchup.team_a.rating.team)}>
-                  {formatNumber(matchup.team_a.rating.team, 1)}
+                <span className="text-2xs font-mono text-zinc-400 block">{matchup.team_a?.team?.name || 'Team A'}</span>
+                <span className={getRatingColor(matchup.team_a?.rating?.team)}>
+                  {formatNumber(matchup.team_a?.rating?.team, 1)}
                 </span>
               </div>
               <div className="border-x border-zinc-800 flex flex-col justify-center">
@@ -100,9 +100,9 @@ export function MatchupSimulatorPage({
                 </span>
               </div>
               <div>
-                <span className="text-2xs font-mono text-zinc-400 block">{matchup.team_b.team.name}</span>
-                <span className={getRatingColor(matchup.team_b.rating.team)}>
-                  {formatNumber(matchup.team_b.rating.team, 1)}
+                <span className="text-2xs font-mono text-zinc-400 block">{matchup.team_b?.team?.name || 'Team B'}</span>
+                <span className={getRatingColor(matchup.team_b?.rating?.team)}>
+                  {formatNumber(matchup.team_b?.rating?.team, 1)}
                 </span>
               </div>
             </div>

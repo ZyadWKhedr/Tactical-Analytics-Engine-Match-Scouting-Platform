@@ -176,12 +176,12 @@ export function OpponentReportPage({ teamId }: OpponentReportPageProps) {
               <span>Sample: {blueprint.matches} matches</span>
               <span>•</span>
               <span className="text-emerald-400">
-                Playstyle: {blueprint.playstyle?.label} ({(blueprint.playstyle?.confidence * 100).toFixed(0)}% conf)
+                Playstyle: {blueprint.playstyle?.label || 'Balanced'} ({((blueprint.playstyle?.confidence ?? 0.8) * 100).toFixed(0)}% conf)
               </span>
             </div>
             <h1 className="text-2xl font-bold tracking-tight text-zinc-100 flex items-center gap-2.5">
               <Shield className="w-6 h-6 text-emerald-400" />
-              {blueprint.team.name}
+              {blueprint.team?.name || 'Club'}
             </h1>
           </div>
 
@@ -189,20 +189,20 @@ export function OpponentReportPage({ teamId }: OpponentReportPageProps) {
           <div className="flex items-center gap-3">
             <div className="px-3.5 py-1.5 rounded border border-zinc-800 bg-zinc-950/60 text-center min-w-[80px]">
               <span className="text-3xs uppercase font-mono text-zinc-500 block">Overall</span>
-              <span className={getRatingColor(blueprint.rating.team)}>
-                {formatNumber(blueprint.rating.team, 1)}
+              <span className={getRatingColor(blueprint.rating?.team)}>
+                {formatNumber(blueprint.rating?.team, 1)}
               </span>
             </div>
             <div className="px-3.5 py-1.5 rounded border border-zinc-800 bg-zinc-950/60 text-center min-w-[80px]">
               <span className="text-3xs uppercase font-mono text-zinc-500 block">Attack</span>
               <span className="font-mono text-base font-bold text-zinc-200">
-                {formatNumber(blueprint.rating.attack, 1)}
+                {formatNumber(blueprint.rating?.attack, 1)}
               </span>
             </div>
             <div className="px-3.5 py-1.5 rounded border border-zinc-800 bg-zinc-950/60 text-center min-w-[80px]">
               <span className="text-3xs uppercase font-mono text-zinc-500 block">Defence</span>
               <span className="font-mono text-base font-bold text-zinc-200">
-                {formatNumber(blueprint.rating.defence, 1)}
+                {formatNumber(blueprint.rating?.defence, 1)}
               </span>
             </div>
           </div>
@@ -267,12 +267,12 @@ export function OpponentReportPage({ teamId }: OpponentReportPageProps) {
             >
               <div className="space-y-3 pt-2">
                 {[
-                  { label: 'Possession Dominance', val: blueprint.playstyle.axes.possession_dominance },
-                  { label: 'Low Block Frequency', val: blueprint.playstyle.axes.low_block },
-                  { label: 'Pressing Intensity', val: blueprint.playstyle.axes.press_intensity },
-                  { label: 'Directness in Build-up', val: blueprint.playstyle.axes.directness ?? 50 },
-                  { label: 'Flank Width Usage', val: blueprint.playstyle.axes.width_usage ?? 50 },
-                  { label: 'Counter Transition Threat', val: blueprint.playstyle.axes.transition_threat ?? 50 },
+                  { label: 'Possession Dominance', val: blueprint.playstyle?.axes?.possession_dominance ?? 50 },
+                  { label: 'Low Block Frequency', val: blueprint.playstyle?.axes?.low_block ?? 50 },
+                  { label: 'Pressing Intensity', val: blueprint.playstyle?.axes?.press_intensity ?? 50 },
+                  { label: 'Directness in Build-up', val: blueprint.playstyle?.axes?.directness ?? 50 },
+                  { label: 'Flank Width Usage', val: blueprint.playstyle?.axes?.width_usage ?? 50 },
+                  { label: 'Counter Transition Threat', val: blueprint.playstyle?.axes?.transition_threat ?? 50 },
                 ].map((axis) => (
                   <div key={axis.label} className="space-y-1 text-xs">
                     <div className="flex justify-between text-2xs font-mono">
