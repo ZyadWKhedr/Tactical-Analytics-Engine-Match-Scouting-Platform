@@ -4,6 +4,7 @@ import { usePlayerRatingsQuery } from '../../shared/api/queries';
 import { ChartCard } from '../../shared/components/ChartCard';
 import { DataTable } from '../../shared/components/DataTable';
 import { formatNumber, formatPercentile, getRatingColor } from '../../shared/lib/utils';
+import { useI18n } from '../../shared/i18n';
 import type { PlayerRatingOut } from '../../api/types';
 
 interface PlayerScoutingPageProps {
@@ -13,6 +14,7 @@ interface PlayerScoutingPageProps {
 export function PlayerScoutingPage({ onSelectPlayer }: PlayerScoutingPageProps) {
   const [positionGroup, setPositionGroup] = useState<string>('All');
   const [minMinutes, setMinMinutes] = useState<number>(300);
+  const { t } = useI18n();
 
   const { data: playersData, isLoading, isError, refetch } = usePlayerRatingsQuery({
     positionGroup: positionGroup === 'All' ? undefined : positionGroup,
@@ -23,35 +25,35 @@ export function PlayerScoutingPage({ onSelectPlayer }: PlayerScoutingPageProps) 
   const columns: ColumnDef<PlayerRatingOut, any>[] = [
     {
       accessorKey: 'player.name',
-      header: 'Player Name',
+      header: t.scoutedPlayers,
       cell: (info) => (
-        <span className="font-semibold text-zinc-100 hover:text-emerald-400 cursor-pointer">
-          {info.getValue<string>()}
+        <span className="font-semibold text-foreground hover:text-emerald-500 cursor-pointer">
+          {info.getValue()}
         </span>
       ),
     },
     {
       accessorKey: 'team.name',
-      header: 'Club',
-      cell: (info) => <span className="text-zinc-300 text-2xs font-mono">{info.getValue<string>() || '—'}</span>,
+      header: t.club,
+      cell: (info) => <span className="text-muted-foreground text-2xs font-mono">{info.getValue<string>() || '—'}</span>,
     },
     {
       accessorKey: 'position_group',
-      header: 'Role / Pos',
+      header: t.role,
       cell: (info) => (
-        <span className="text-2xs font-mono px-1.5 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-300">
+        <span className="text-2xs font-mono px-1.5 py-0.5 rounded bg-surface border border-border text-foreground">
           {info.getValue<string>() || 'Field'}
         </span>
       ),
     },
     {
       accessorKey: 'minutes',
-      header: 'Minutes',
-      cell: (info) => <span className="font-mono tabular-nums text-zinc-400">{info.getValue<number>()}&apos;</span>,
+      header: t.minutes,
+      cell: (info) => <span className="font-mono tabular-nums text-muted-foreground">{info.getValue<number>()}&apos;</span>,
     },
     {
       accessorKey: 'rating',
-      header: 'Rating (1-10)',
+      header: t.rating,
       cell: (info) => {
         const val = info.getValue<number>();
         return <span className={getRatingColor(val)}>{formatNumber(val, 2)}</span>;
@@ -60,29 +62,29 @@ export function PlayerScoutingPage({ onSelectPlayer }: PlayerScoutingPageProps) 
     {
       accessorKey: 'percentile_in_position',
       header: 'Pos. Percentile',
-      cell: (info) => <span className="font-mono tabular-nums text-zinc-300">{formatPercentile(info.getValue<number>())}</span>,
+      cell: (info) => <span className="font-mono tabular-nums text-foreground">{formatPercentile(info.getValue<number>())}</span>,
     },
     {
       accessorKey: 'xg',
-      header: 'xG',
-      cell: (info) => <span className="font-mono tabular-nums text-zinc-300">{formatNumber(info.getValue<number>(), 2)}</span>,
+      header: t.xg,
+      cell: (info) => <span className="font-mono tabular-nums text-foreground">{formatNumber(info.getValue<number>(), 2)}</span>,
     },
     {
       accessorKey: 'xa',
-      header: 'xA',
-      cell: (info) => <span className="font-mono tabular-nums text-zinc-300">{formatNumber(info.getValue<number>(), 2)}</span>,
+      header: t.xa,
+      cell: (info) => <span className="font-mono tabular-nums text-foreground">{formatNumber(info.getValue<number>(), 2)}</span>,
     },
     {
       accessorKey: 'goals',
-      header: 'Goals',
-      cell: (info) => <span className="font-mono tabular-nums text-emerald-400 font-bold">{info.getValue<number>()}</span>,
+      header: t.goals,
+      cell: (info) => <span className="font-mono tabular-nums text-emerald-500 font-bold">{info.getValue()}</span>,
     },
   ];
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto">
+    <div className="p-4 sm:p-6 space-y-6 max-w-7xl mx-auto">
       <ChartCard
-        title="Player Scouting & Percentile Rankings"
+        title={t.playerScouting}
         subtitle="Hierarchical Bayes ratings across position-specific action components"
         sampleSize={`${playersData?.total ?? 0} qualified players`}
         units="Scale 1.0 - 10.0"
@@ -91,7 +93,7 @@ export function PlayerScoutingPage({ onSelectPlayer }: PlayerScoutingPageProps) 
             <select
               value={positionGroup}
               onChange={(e) => setPositionGroup(e.target.value)}
-              className="h-7 px-2 text-2xs rounded border border-zinc-800 bg-zinc-900 text-zinc-300 font-mono"
+              className="h-7 px-2 text-2xs rounded border border-border bg-surface text-foreground font-mono"
             >
               <option value="All">All Positions</option>
               <option value="Forward">Forwards</option>
@@ -102,7 +104,7 @@ export function PlayerScoutingPage({ onSelectPlayer }: PlayerScoutingPageProps) 
             <select
               value={minMinutes}
               onChange={(e) => setMinMinutes(Number(e.target.value))}
-              className="h-7 px-2 text-2xs rounded border border-zinc-800 bg-zinc-900 text-zinc-300 font-mono"
+              className="h-7 px-2 text-2xs rounded border border-border bg-surface text-foreground font-mono"
             >
               <option value={0}>≥ 0 mins</option>
               <option value={300}>≥ 300 mins</option>

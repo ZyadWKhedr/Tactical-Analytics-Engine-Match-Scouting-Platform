@@ -13,17 +13,15 @@ import { ShotMap } from '../../shared/components/ShotMap';
 import { PassNetwork } from '../../shared/components/PassNetwork';
 import { ZoneGrid } from '../../shared/components/ZoneGrid';
 import { formatNumber, formatPercent, formatPercentile, getRatingColor } from '../../shared/lib/utils';
+import { useI18n } from '../../shared/i18n';
 import {
   Shield,
   Activity,
-  AlertTriangle,
-  CheckCircle2,
   Crosshair,
   Compass,
-  FileText,
   Sliders,
 } from 'lucide-react';
-import type { PressTrigger, SwotItem, TopPlayer } from '../../api/types';
+import type { PressTrigger, TopPlayer } from '../../api/types';
 
 interface OpponentReportPageProps {
   teamId: number;
@@ -31,6 +29,7 @@ interface OpponentReportPageProps {
 
 export function OpponentReportPage({ teamId }: OpponentReportPageProps) {
   const [activeTab, setActiveTab] = useState<'blueprint' | 'zones' | 'shots' | 'network'>('blueprint');
+  const { t } = useI18n();
 
   // Queries
   const { data: blueprint, isLoading: bpLoading, isError: bpError, refetch: refetchBp } =
@@ -48,14 +47,14 @@ export function OpponentReportPage({ teamId }: OpponentReportPageProps) {
       accessorKey: 'trigger',
       header: 'Situational Trigger',
       cell: (info) => (
-        <span className="font-medium text-zinc-200">{info.getValue<string>()}</span>
+        <span className="font-medium text-foreground">{info.getValue()}</span>
       ),
     },
     {
       accessorKey: 'engagement_rate',
       header: 'Press Rate',
       cell: (info) => (
-        <span className="font-mono tabular-nums text-emerald-400 font-semibold">
+        <span className="font-mono tabular-nums text-emerald-500 font-semibold">
           {formatPercent(info.getValue<number>())}
         </span>
       ),
@@ -64,7 +63,7 @@ export function OpponentReportPage({ teamId }: OpponentReportPageProps) {
       accessorKey: 'league_rate',
       header: 'League Avg',
       cell: (info) => (
-        <span className="font-mono tabular-nums text-zinc-400">
+        <span className="font-mono tabular-nums text-muted-foreground">
           {formatPercent(info.getValue<number>())}
         </span>
       ),
@@ -75,7 +74,7 @@ export function OpponentReportPage({ teamId }: OpponentReportPageProps) {
       cell: (info) => {
         const lift = info.getValue<number>();
         return (
-          <span className="font-mono tabular-nums text-zinc-200">
+          <span className="font-mono tabular-nums text-foreground">
             {lift > 0 ? `+${(lift * 100).toFixed(1)}%` : `${(lift * 100).toFixed(1)}%`}
           </span>
         );
@@ -85,7 +84,7 @@ export function OpponentReportPage({ teamId }: OpponentReportPageProps) {
       accessorKey: 'z',
       header: 'Z-Score',
       cell: (info) => (
-        <span className="font-mono tabular-nums text-zinc-400">
+        <span className="font-mono tabular-nums text-muted-foreground">
           {formatNumber(info.getValue<number>(), 2)}σ
         </span>
       ),
@@ -94,8 +93,8 @@ export function OpponentReportPage({ teamId }: OpponentReportPageProps) {
       accessorKey: 'opportunities',
       header: 'Sample (n)',
       cell: (info) => (
-        <span className="font-mono tabular-nums text-zinc-500">
-          {info.getValue<number>()} opps
+        <span className="font-mono tabular-nums text-muted-foreground">
+          {info.getValue()} opps
         </span>
       ),
     },
@@ -105,21 +104,21 @@ export function OpponentReportPage({ teamId }: OpponentReportPageProps) {
   const playerColumns: ColumnDef<TopPlayer, any>[] = [
     {
       accessorKey: 'player.name',
-      header: 'Scouted Key Player',
+      header: t.scoutedPlayers,
       cell: (info) => (
-        <span className="font-medium text-zinc-200">{info.getValue<string>()}</span>
+        <span className="font-medium text-foreground">{info.getValue()}</span>
       ),
     },
     {
       accessorKey: 'position',
-      header: 'Role',
+      header: t.role,
       cell: (info) => (
-        <span className="font-mono text-2xs text-zinc-400">{info.getValue<string>() || '—'}</span>
+        <span className="font-mono text-2xs text-muted-foreground">{info.getValue<string>() || '—'}</span>
       ),
     },
     {
       accessorKey: 'rating',
-      header: 'Rating (1-10)',
+      header: t.rating,
       cell: (info) => (
         <span className={getRatingColor(info.getValue<number>())}>
           {formatNumber(info.getValue<number>(), 1)}
@@ -130,7 +129,7 @@ export function OpponentReportPage({ teamId }: OpponentReportPageProps) {
       accessorKey: 'percentile_in_position',
       header: 'Pos. Percentile',
       cell: (info) => (
-        <span className="font-mono text-zinc-300">
+        <span className="font-mono text-foreground">
           {formatPercentile(info.getValue<number>())}
         </span>
       ),
@@ -141,8 +140,8 @@ export function OpponentReportPage({ teamId }: OpponentReportPageProps) {
     return (
       <div className="p-8 flex flex-col items-center justify-center gap-3 min-h-[400px]">
         <div className="w-8 h-8 border-2 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin" />
-        <span className="text-xs font-mono text-zinc-400">
-          Synthesizing tactical opponent blueprint...
+        <span className="text-xs font-mono text-muted-foreground">
+          {t.loading}
         </span>
       </div>
     );
@@ -152,7 +151,7 @@ export function OpponentReportPage({ teamId }: OpponentReportPageProps) {
     return (
       <div className="p-8">
         <ChartCard
-          title="Opponent Scouting Blueprint"
+          title={t.opponentReport}
           isError
           errorMessage="Failed to retrieve opponent data from the analytics engine."
           onRetry={() => refetchBp()}
@@ -164,44 +163,44 @@ export function OpponentReportPage({ teamId }: OpponentReportPageProps) {
   }
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto">
+    <div className="p-4 sm:p-6 space-y-6 max-w-7xl mx-auto">
       {/* Opponent Header Banner */}
-      <div className="rounded-lg border border-zinc-800 bg-zinc-900/80 p-5 shadow-sm">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-800 pb-4 mb-4">
+      <div className="rounded-lg border border-border bg-card p-5 shadow-xs">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-4 mb-4">
           <div>
-            <div className="flex items-center gap-2 text-2xs font-mono text-zinc-400 mb-1">
-              <span className="px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700/60 text-zinc-300">
+            <div className="flex items-center gap-2 text-2xs font-mono text-muted-foreground mb-1">
+              <span className="px-2 py-0.5 rounded bg-surface border border-border text-foreground">
                 {blueprint.competition_name || 'League Scouting'}
               </span>
-              <span>Sample: {blueprint.matches} matches</span>
+              <span>{t.sample}: {blueprint.matches} {t.matches}</span>
               <span>•</span>
-              <span className="text-emerald-400">
-                Playstyle: {blueprint.playstyle?.label || 'Balanced'} ({((blueprint.playstyle?.confidence ?? 0.8) * 100).toFixed(0)}% conf)
+              <span className="text-emerald-500 dark:text-emerald-400">
+                {t.playstyle}: {blueprint.playstyle?.label || 'Balanced'} ({((blueprint.playstyle?.confidence ?? 0.8) * 100).toFixed(0)}% {t.conf})
               </span>
             </div>
-            <h1 className="text-2xl font-bold tracking-tight text-zinc-100 flex items-center gap-2.5">
-              <Shield className="w-6 h-6 text-emerald-400" />
+            <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2.5">
+              <Shield className="w-6 h-6 text-emerald-500 dark:text-emerald-400 shrink-0" />
               {blueprint.team?.name || 'Club'}
             </h1>
           </div>
 
           {/* Rating Triplet Badges */}
           <div className="flex items-center gap-3">
-            <div className="px-3.5 py-1.5 rounded border border-zinc-800 bg-zinc-950/60 text-center min-w-[80px]">
-              <span className="text-3xs uppercase font-mono text-zinc-500 block">Overall</span>
+            <div className="px-3.5 py-1.5 rounded border border-border bg-surface text-center min-w-[80px]">
+              <span className="text-3xs uppercase font-mono text-muted-foreground block">{t.overallRating}</span>
               <span className={getRatingColor(blueprint.rating?.team)}>
                 {formatNumber(blueprint.rating?.team, 1)}
               </span>
             </div>
-            <div className="px-3.5 py-1.5 rounded border border-zinc-800 bg-zinc-950/60 text-center min-w-[80px]">
-              <span className="text-3xs uppercase font-mono text-zinc-500 block">Attack</span>
-              <span className="font-mono text-base font-bold text-zinc-200">
+            <div className="px-3.5 py-1.5 rounded border border-border bg-surface text-center min-w-[80px]">
+              <span className="text-3xs uppercase font-mono text-muted-foreground block">{t.attack}</span>
+              <span className="font-mono text-base font-bold text-foreground">
                 {formatNumber(blueprint.rating?.attack, 1)}
               </span>
             </div>
-            <div className="px-3.5 py-1.5 rounded border border-zinc-800 bg-zinc-950/60 text-center min-w-[80px]">
-              <span className="text-3xs uppercase font-mono text-zinc-500 block">Defence</span>
-              <span className="font-mono text-base font-bold text-zinc-200">
+            <div className="px-3.5 py-1.5 rounded border border-border bg-surface text-center min-w-[80px]">
+              <span className="text-3xs uppercase font-mono text-muted-foreground block">{t.defence}</span>
+              <span className="font-mono text-base font-bold text-foreground">
                 {formatNumber(blueprint.rating?.defence, 1)}
               </span>
             </div>
@@ -209,46 +208,46 @@ export function OpponentReportPage({ teamId }: OpponentReportPageProps) {
         </div>
 
         {/* Tab Navigation Pill Bar */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 overflow-x-auto pb-1">
           <button
             onClick={() => setActiveTab('blueprint')}
-            className={`px-3 py-1.5 rounded text-xs font-medium inline-flex items-center gap-1.5 transition-colors ${
+            className={`px-3 py-1.5 rounded text-xs font-medium inline-flex items-center gap-1.5 transition-colors shrink-0 ${
               activeTab === 'blueprint'
-                ? 'bg-zinc-800 text-white border border-zinc-700'
-                : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900'
+                ? 'bg-surface text-emerald-500 dark:text-emerald-400 border border-border font-semibold'
+                : 'text-muted-foreground hover:text-foreground hover:bg-surface/50'
             }`}
           >
-            <Compass className="w-3.5 h-3.5" /> Blueprint & Tendencies
+            <Compass className="w-3.5 h-3.5" /> {t.blueprintTendencies}
           </button>
           <button
             onClick={() => setActiveTab('zones')}
-            className={`px-3 py-1.5 rounded text-xs font-medium inline-flex items-center gap-1.5 transition-colors ${
+            className={`px-3 py-1.5 rounded text-xs font-medium inline-flex items-center gap-1.5 transition-colors shrink-0 ${
               activeTab === 'zones'
-                ? 'bg-zinc-800 text-white border border-zinc-700'
-                : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900'
+                ? 'bg-surface text-emerald-500 dark:text-emerald-400 border border-border font-semibold'
+                : 'text-muted-foreground hover:text-foreground hover:bg-surface/50'
             }`}
           >
-            <Sliders className="w-3.5 h-3.5" /> 6x5 Pitch Zones
+            <Sliders className="w-3.5 h-3.5" /> {t.pitchZones}
           </button>
           <button
             onClick={() => setActiveTab('shots')}
-            className={`px-3 py-1.5 rounded text-xs font-medium inline-flex items-center gap-1.5 transition-colors ${
+            className={`px-3 py-1.5 rounded text-xs font-medium inline-flex items-center gap-1.5 transition-colors shrink-0 ${
               activeTab === 'shots'
-                ? 'bg-zinc-800 text-white border border-zinc-700'
-                : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900'
+                ? 'bg-surface text-emerald-500 dark:text-emerald-400 border border-border font-semibold'
+                : 'text-muted-foreground hover:text-foreground hover:bg-surface/50'
             }`}
           >
-            <Crosshair className="w-3.5 h-3.5" /> xG Shot Maps
+            <Crosshair className="w-3.5 h-3.5" /> {t.shotMaps}
           </button>
           <button
             onClick={() => setActiveTab('network')}
-            className={`px-3 py-1.5 rounded text-xs font-medium inline-flex items-center gap-1.5 transition-colors ${
+            className={`px-3 py-1.5 rounded text-xs font-medium inline-flex items-center gap-1.5 transition-colors shrink-0 ${
               activeTab === 'network'
-                ? 'bg-zinc-800 text-white border border-zinc-700'
-                : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900'
+                ? 'bg-surface text-emerald-500 dark:text-emerald-400 border border-border font-semibold'
+                : 'text-muted-foreground hover:text-foreground hover:bg-surface/50'
             }`}
           >
-            <Activity className="w-3.5 h-3.5" /> Passing Network
+            <Activity className="w-3.5 h-3.5" /> {t.passingNetwork}
           </button>
         </div>
       </div>
@@ -260,9 +259,9 @@ export function OpponentReportPage({ teamId }: OpponentReportPageProps) {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Playstyle Axes Dimensions */}
             <ChartCard
-              title="Playstyle Fingerprint"
+              title={t.playstyleFingerprint}
               subtitle="6 continuous tactical dimensions (0-100 scale)"
-              sampleSize={`n = ${blueprint.matches} matches`}
+              sampleSize={`n = ${blueprint.matches} ${t.matches}`}
               units="Normalized Index"
             >
               <div className="space-y-3 pt-2">
@@ -276,10 +275,10 @@ export function OpponentReportPage({ teamId }: OpponentReportPageProps) {
                 ].map((axis) => (
                   <div key={axis.label} className="space-y-1 text-xs">
                     <div className="flex justify-between text-2xs font-mono">
-                      <span className="text-zinc-400 font-sans">{axis.label}</span>
-                      <span className="text-zinc-200 font-semibold">{axis.val.toFixed(0)} / 100</span>
+                      <span className="text-muted-foreground font-sans">{axis.label}</span>
+                      <span className="text-foreground font-semibold">{axis.val.toFixed(0)} / 100</span>
                     </div>
-                    <div className="w-full bg-zinc-800 rounded-full h-1.5 overflow-hidden">
+                    <div className="w-full bg-surface rounded-full h-1.5 overflow-hidden">
                       <div
                         className="bg-emerald-500 h-full rounded-full transition-all duration-300"
                         style={{ width: `${Math.min(100, Math.max(0, axis.val))}%` }}
@@ -295,23 +294,23 @@ export function OpponentReportPage({ teamId }: OpponentReportPageProps) {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Strengths */}
                 <ChartCard
-                  title="Strengths (Percentile ≥ 75th)"
-                  sampleSize={`${blueprint.strengths.length} items`}
+                  title={t.strengths}
+                  sampleSize={`${blueprint.strengths?.length ?? 0} items`}
                   units="League percentile"
                 >
                   <div className="space-y-2.5">
-                    {blueprint.strengths.slice(0, 4).map((item) => (
+                    {blueprint.strengths?.slice(0, 4).map((item) => (
                       <div
                         key={item.metric}
-                        className="p-2.5 rounded border border-emerald-950/60 bg-emerald-950/20 text-xs"
+                        className="p-2.5 rounded border border-emerald-500/20 bg-emerald-500/5 text-xs"
                       >
                         <div className="flex items-center justify-between font-sans">
-                          <span className="font-semibold text-emerald-300">{item.label}</span>
-                          <span className="text-2xs font-mono text-emerald-400 bg-emerald-900/40 px-1.5 py-0.5 rounded">
+                          <span className="font-semibold text-emerald-600 dark:text-emerald-400">{item.label}</span>
+                          <span className="text-2xs font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">
                             {formatPercentile(item.percentile)}
                           </span>
                         </div>
-                        <div className="text-2xs text-zinc-400 mt-1 font-mono">
+                        <div className="text-2xs text-muted-foreground mt-1 font-mono">
                           Value: {formatNumber(item.value, 2)} {item.unit || ''} ({item.phase})
                         </div>
                       </div>
@@ -321,23 +320,23 @@ export function OpponentReportPage({ teamId }: OpponentReportPageProps) {
 
                 {/* Weaknesses */}
                 <ChartCard
-                  title="Weaknesses (Percentile ≤ 30th)"
-                  sampleSize={`${blueprint.weaknesses.length} items`}
+                  title={t.weaknesses}
+                  sampleSize={`${blueprint.weaknesses?.length ?? 0} items`}
                   units="League percentile"
                 >
                   <div className="space-y-2.5">
-                    {blueprint.weaknesses.slice(0, 4).map((item) => (
+                    {blueprint.weaknesses?.slice(0, 4).map((item) => (
                       <div
                         key={item.metric}
-                        className="p-2.5 rounded border border-rose-950/60 bg-rose-950/20 text-xs"
+                        className="p-2.5 rounded border border-rose-500/20 bg-rose-500/5 text-xs"
                       >
                         <div className="flex items-center justify-between font-sans">
-                          <span className="font-semibold text-rose-300">{item.label}</span>
-                          <span className="text-2xs font-mono text-rose-400 bg-rose-900/40 px-1.5 py-0.5 rounded">
+                          <span className="font-semibold text-rose-600 dark:text-rose-400">{item.label}</span>
+                          <span className="text-2xs font-mono text-rose-600 dark:text-rose-400 bg-rose-500/10 px-1.5 py-0.5 rounded">
                             {formatPercentile(item.percentile)}
                           </span>
                         </div>
-                        <div className="text-2xs text-zinc-400 mt-1 font-mono">
+                        <div className="text-2xs text-muted-foreground mt-1 font-mono">
                           Value: {formatNumber(item.value, 2)} {item.unit || ''} ({item.phase})
                         </div>
                       </div>
@@ -351,28 +350,28 @@ export function OpponentReportPage({ teamId }: OpponentReportPageProps) {
           {/* Press Triggers & Blind Spots */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <ChartCard
-              title="Situational Press Triggers"
+              title={t.situationalPressTriggers}
               subtitle="Where opponent aggressively commits pressing actions"
-              sampleSize={`${blueprint.press_triggers.length} patterns`}
+              sampleSize={`${blueprint.press_triggers?.length ?? 0} patterns`}
               units="Lift over league"
             >
               <DataTable
                 columns={pressColumns}
-                data={blueprint.press_triggers}
+                data={blueprint.press_triggers || []}
                 pageSize={4}
                 searchPlaceholder=""
               />
             </ChartCard>
 
             <ChartCard
-              title="Pressing Blind Spots"
+              title={t.pressBlindSpots}
               subtitle="Situations with low opponent engagement / delayed recovery"
-              sampleSize={`${blueprint.press_blind_spots.length} patterns`}
+              sampleSize={`${blueprint.press_blind_spots?.length ?? 0} patterns`}
               units="Negative lift"
             >
               <DataTable
                 columns={pressColumns}
-                data={blueprint.press_blind_spots}
+                data={blueprint.press_blind_spots || []}
                 pageSize={4}
                 searchPlaceholder=""
               />
@@ -383,14 +382,14 @@ export function OpponentReportPage({ teamId }: OpponentReportPageProps) {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-1">
               <ChartCard
-                title="Key Player Threats"
+                title={t.keyPlayerThreats}
                 subtitle="Top rated individuals by position"
-                sampleSize={`${blueprint.top_players.length} players`}
+                sampleSize={`${blueprint.top_players?.length ?? 0} ${t.scoutedPlayers}`}
                 units="1-10 Scale"
               >
                 <DataTable
                   columns={playerColumns}
-                  data={blueprint.top_players}
+                  data={blueprint.top_players || []}
                   pageSize={4}
                   searchPlaceholder=""
                 />
@@ -399,7 +398,7 @@ export function OpponentReportPage({ teamId }: OpponentReportPageProps) {
 
             <div className="lg:col-span-2">
               <ChartCard
-                title="Tactical Game Plan Recommendations"
+                title={t.tacticalGamePlan}
                 subtitle="Deterministic rule-based directives synthesized from SWOT and Zone vulnerabilities"
                 sampleSize="Coach Briefing"
               >
@@ -408,17 +407,17 @@ export function OpponentReportPage({ teamId }: OpponentReportPageProps) {
                     blueprint.game_plan.map((directive, idx) => (
                       <div
                         key={idx}
-                        className="flex items-start gap-3 p-3 rounded border border-zinc-800 bg-zinc-900/60 text-xs"
+                        className="flex items-start gap-3 p-3 rounded border border-border bg-surface text-xs"
                       >
-                        <div className="w-5 h-5 rounded-full bg-emerald-950 border border-emerald-800 text-emerald-400 font-mono flex items-center justify-center shrink-0 text-2xs font-bold">
+                        <div className="w-5 h-5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 dark:text-emerald-400 font-mono flex items-center justify-center shrink-0 text-2xs font-bold">
                           {idx + 1}
                         </div>
-                        <p className="text-zinc-200 leading-relaxed font-sans">{directive}</p>
+                        <p className="text-foreground leading-relaxed font-sans">{directive}</p>
                       </div>
                     ))
                   ) : (
-                    <div className="text-xs text-zinc-500 font-mono p-4">
-                      No game plan rules triggered for this opponent profile.
+                    <div className="text-xs text-muted-foreground font-mono p-4">
+                      {t.noRecords}
                     </div>
                   )}
                 </div>
@@ -431,9 +430,9 @@ export function OpponentReportPage({ teamId }: OpponentReportPageProps) {
       {/* 6x5 Pitch Zones Tab */}
       {activeTab === 'zones' && (
         <ChartCard
-          title="6x5 Pitch Zone Vulnerability Matrix"
+          title={t.pitchZones}
           subtitle="Reliability-calibrated conceded entries, conceded xT and shot chains across 30 pitch sectors"
-          sampleSize={`n = ${blueprint.matches} matches`}
+          sampleSize={`n = ${blueprint.matches} ${t.matches}`}
           units="Vulnerability Index (0-1.0)"
           isLoading={zonesLoading}
         >
@@ -442,8 +441,8 @@ export function OpponentReportPage({ teamId }: OpponentReportPageProps) {
               <ZoneGrid data={zonesData} />
             </div>
           ) : (
-            <div className="text-xs text-zinc-500 font-mono py-8 text-center">
-              No zone grid data available.
+            <div className="text-xs text-muted-foreground font-mono py-8 text-center">
+              {t.noRecords}
             </div>
           )}
         </ChartCard>
@@ -452,7 +451,7 @@ export function OpponentReportPage({ teamId }: OpponentReportPageProps) {
       {/* xG Shot Maps Tab */}
       {activeTab === 'shots' && (
         <ChartCard
-          title="Recent Shot Map & xG Outcomes"
+          title={t.shotMaps}
           subtitle="Event-level shot distribution on standard 105m × 68m coordinate surface"
           sampleSize={`Match #${latestMatchId || 'Recent'}`}
           units="Circle area = √xG"
@@ -463,8 +462,8 @@ export function OpponentReportPage({ teamId }: OpponentReportPageProps) {
               <ShotMap shots={shotsData} />
             </div>
           ) : (
-            <div className="text-xs text-zinc-500 font-mono py-8 text-center">
-              No shot events recorded for the selected match sample.
+            <div className="text-xs text-muted-foreground font-mono py-8 text-center">
+              {t.noRecords}
             </div>
           )}
         </ChartCard>
@@ -473,19 +472,19 @@ export function OpponentReportPage({ teamId }: OpponentReportPageProps) {
       {/* Passing Network Tab */}
       {activeTab === 'network' && (
         <ChartCard
-          title="Tactical Passing Network & Positional Structure"
+          title={t.passingNetwork}
           subtitle="Node coordinates = player average position; Link width = pass exchange frequency"
           sampleSize={`Match #${latestMatchId || 'Recent'}`}
           units="≥ 2 completed passes"
           isLoading={passLoading}
         >
-          {passingData && passingData.nodes.length > 0 ? (
+          {passingData && passingData.nodes?.length > 0 ? (
             <div className="max-w-3xl mx-auto py-2">
               <PassNetwork data={passingData} />
             </div>
           ) : (
-            <div className="text-xs text-zinc-500 font-mono py-8 text-center">
-              No passing network data available for this match.
+            <div className="text-xs text-muted-foreground font-mono py-8 text-center">
+              {t.noRecords}
             </div>
           )}
         </ChartCard>

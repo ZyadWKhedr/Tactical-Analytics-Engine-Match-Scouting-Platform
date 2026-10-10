@@ -1,5 +1,5 @@
 import React from 'react';
-import { cn, formatNumber } from '../lib/utils';
+import { cn } from '../lib/utils';
 import { ArrowDownRight, ArrowUpRight, Minus } from 'lucide-react';
 
 interface StatCardProps {
@@ -27,36 +27,34 @@ export function StatCard({
   className,
   status,
 }: StatCardProps) {
-  // Determine delta color semantics
-  let deltaColor = 'text-zinc-400 bg-zinc-800/60 border-zinc-700/40';
+  let deltaColor = 'text-muted-foreground bg-surface border-border';
   let DeltaIcon = Minus;
 
   if (delta !== null && delta !== undefined) {
     if (delta > 0) {
       DeltaIcon = ArrowUpRight;
       if (status === 'negative') {
-        deltaColor = 'text-rose-400 bg-rose-950/40 border-rose-800/40';
+        deltaColor = 'text-rose-500 bg-rose-500/10 border-rose-500/20';
       } else {
-        deltaColor = 'text-emerald-400 bg-emerald-950/40 border-emerald-800/40';
+        deltaColor = 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20';
       }
     } else if (delta < 0) {
       DeltaIcon = ArrowDownRight;
       if (status === 'positive') {
-        deltaColor = 'text-emerald-400 bg-emerald-950/40 border-emerald-800/40';
+        deltaColor = 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20';
       } else {
-        deltaColor = 'text-rose-400 bg-rose-950/40 border-rose-800/40';
+        deltaColor = 'text-rose-500 bg-rose-500/10 border-rose-500/20';
       }
     }
   }
 
-  // Render minimal SVG sparkline
   const renderSparkline = (data: number[]) => {
     if (!data || data.length < 2) return null;
     const min = Math.min(...data);
     const max = Math.max(...data);
     const range = max - min || 1;
-    const width = 64;
-    const height = 24;
+    const width = 56;
+    const height = 20;
 
     const points = data
       .map((val, idx) => {
@@ -70,7 +68,7 @@ export function StatCard({
     const lastY = height - ((data[data.length - 1] - min) / range) * (height - 4) - 2;
 
     return (
-      <svg width={width} height={height} className="overflow-visible stroke-zinc-400 fill-none">
+      <svg width={width} height={height} className="overflow-visible stroke-muted-foreground fill-none shrink-0">
         <polyline
           fill="none"
           stroke="currentColor"
@@ -79,7 +77,7 @@ export function StatCard({
           strokeLinejoin="round"
           points={points}
         />
-        <circle cx={lastX} cy={lastY} r="2" className="fill-emerald-400 stroke-none" />
+        <circle cx={lastX} cy={lastY} r="2" className="fill-emerald-500 stroke-none" />
       </svg>
     );
   };
@@ -87,25 +85,31 @@ export function StatCard({
   return (
     <div
       className={cn(
-        'rounded-lg border border-zinc-800/80 bg-zinc-900/50 p-3.5 shadow-sm hover:border-zinc-700/80 transition-colors',
+        'rounded-lg border border-border bg-card p-3.5 shadow-xs hover:border-border/80 transition-colors flex flex-col justify-between min-h-[96px]',
         className
       )}
     >
-      <div className="flex items-center justify-between gap-2">
-        <span className="text-2xs font-medium uppercase tracking-wider text-zinc-400 truncate">{label}</span>
-        {sampleSize && <span className="text-2xs font-mono text-zinc-500">{sampleSize}</span>}
+      <div className="flex items-center justify-between gap-1.5">
+        <span className="text-2xs font-medium uppercase tracking-wider text-muted-foreground leading-snug">
+          {label}
+        </span>
+        {sampleSize && (
+          <span className="text-2xs font-mono text-muted-foreground px-1 py-0.2 rounded bg-surface border border-border shrink-0">
+            {sampleSize}
+          </span>
+        )}
       </div>
 
-      <div className="mt-1.5 flex items-baseline justify-between gap-2">
-        <div className="flex items-baseline gap-1">
-          <span className="text-xl font-bold tracking-tight font-mono tabular-nums text-zinc-100">
-            {typeof value === 'number' ? formatNumber(value) : value ?? '—'}
+      <div className="mt-1 flex items-baseline justify-between gap-2">
+        <div className="flex items-baseline gap-1.5 overflow-hidden">
+          <span className="text-lg sm:text-xl font-bold tracking-tight font-mono tabular-nums text-foreground truncate">
+            {value ?? '—'}
           </span>
-          {unit && <span className="text-xs font-mono text-zinc-400">{unit}</span>}
+          {unit && <span className="text-xs font-mono text-muted-foreground shrink-0">{unit}</span>}
         </div>
 
         {sparklineData && sparklineData.length > 1 && (
-          <div className="text-zinc-500">{renderSparkline(sparklineData)}</div>
+          <div>{renderSparkline(sparklineData)}</div>
         )}
       </div>
 
@@ -115,10 +119,10 @@ export function StatCard({
             <div className={cn('inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded border font-mono', deltaColor)}>
               <DeltaIcon className="w-3 h-3" />
               <span>{delta > 0 ? `+${delta.toFixed(2)}` : delta.toFixed(2)}</span>
-              {deltaLabel && <span className="text-zinc-400 ml-0.5 font-sans">{deltaLabel}</span>}
+              {deltaLabel && <span className="text-muted-foreground ml-0.5 font-sans">{deltaLabel}</span>}
             </div>
           )}
-          {benchmark && <span className="text-zinc-500 font-mono ml-auto">{benchmark}</span>}
+          {benchmark && <span className="text-muted-foreground font-mono ml-auto truncate">{benchmark}</span>}
         </div>
       )}
     </div>
