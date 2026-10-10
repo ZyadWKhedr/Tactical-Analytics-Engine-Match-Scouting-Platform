@@ -33,6 +33,8 @@ function DashboardApp() {
   const [selectedCompetitionId, setSelectedCompetitionId] = useState<number | undefined>(urlCompId);
   const [matchupTeamB, setMatchupTeamB] = useState<number>(1659); // AFC Bournemouth
 
+  const [opponentSubTab, setOpponentSubTab] = useState<'overview' | 'attack' | 'defence' | 'buildup' | 'setpieces'>('overview');
+
   // Synchronize state changes to URL query parameters
   useEffect(() => {
     setParams({
@@ -42,8 +44,13 @@ function DashboardApp() {
     });
   }, [activeTab, selectedTeamId, selectedCompetitionId, setParams]);
 
-  const handleSelectTeam = (teamId: number) => {
+  const handleSelectTeam = (teamId: number, targetTab?: string) => {
     setSelectedTeamId(teamId);
+    if (targetTab && ['overview', 'attack', 'defence', 'buildup', 'setpieces'].includes(targetTab)) {
+      setOpponentSubTab(targetTab as any);
+    } else {
+      setOpponentSubTab('overview');
+    }
     setActiveTab('opponent');
   };
 
@@ -61,11 +68,12 @@ function DashboardApp() {
           selectedTeamId={selectedTeamId}
           onNavigateToOpponent={handleSelectTeam}
           onNavigateToSquads={() => setActiveTab('squads')}
+          onNavigateToMatchup={() => setActiveTab('matchup')}
         />
       )}
 
       {activeTab === 'opponent' && (
-        <OpponentReportPage teamId={selectedTeamId} />
+        <OpponentReportPage teamId={selectedTeamId} initialTab={opponentSubTab} />
       )}
 
       {activeTab === 'squads' && (

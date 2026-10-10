@@ -6,133 +6,102 @@
   :root,
   :root[data-theme="dark"],
   :root.dark {
-    --bg: #0F0E0C;          /* warm near-black, not blue-black */
-    --bg-raised: #171512;   /* cards, drawers */
-    --bg-sunken: #1F1C18;   /* table stripes, inputs */
-    --ink: #F2EDE3;         /* primary text */
-    --ink-2: #BDB6A8;       /* secondary text */
-    --ink-3: #7E786D;       /* captions, disabled */
-    --rule: #2B2822;        /* hairlines */
-    --rule-strong: #F2EDE3; /* section rules */
-    --accent: #FF4A3D;      /* vermilion red, the ONE accent */
-    --accent-ink: #0F0E0C;
-    --positive: #6FBF98;
-    --negative: #FF6B5E;
-    --warning: #E0B04F;
-    --pitch: #1A1814;       /* pitch fill */
-    --pitch-line: rgba(242, 237, 227, 0.2);
+    --bg: #0B0D10;
+    --panel: #13161B;
+    --panel-2: #1A1E24;
+    --border: #252A32;
+    --text: #ECEFF3;
+    --text-2: #A3ACB8;
+    --text-3: #6F7885;
+    --accent: #5B8CFF;
+    --accent-soft: #1B2740;
+    --positive: #3CC48D;
+    --negative: #F06A6A;
+    --warning: #E8B34A;
+    --pitch: #12161B;
+    --pitch-line: #2E343D;
 
-    /* Mappings for legacy theme classes */
-    --background: var(--bg);
-    --foreground: var(--ink);
-    --card: var(--bg-raised);
-    --card-foreground: var(--ink);
-    --surface: var(--bg-sunken);
-    --surface-subtle: var(--bg-sunken);
-    --surface-highlight: var(--bg-raised);
-    --border: var(--rule);
-    --input: var(--rule);
-    --ring: var(--accent);
-    --muted: var(--bg-sunken);
-    --muted-foreground: var(--ink-3);
+    /* Compatibility mappings */
+    --bg-raised: var(--panel);
+    --bg-sunken: var(--panel-2);
+    --ink: var(--text);
+    --ink-2: var(--text-2);
+    --ink-3: var(--text-3);
+    --rule: var(--border);
+    --rule-strong: #3D4450;
+    --accent-ink: #FFFFFF;
   }
 
   :root[data-theme="light"],
   :root.light {
-    --bg: #F4F0E8;          /* warm paper */
-    --bg-raised: #FBF9F4;   /* cards, drawers */
-    --bg-sunken: #EBE6DB;   /* table stripes, inputs */
-    --ink: #14110F;         /* primary text */
-    --ink-2: #4A453F;       /* secondary text */
-    --ink-3: #8A8378;       /* captions, disabled */
-    --rule: #D8D1C3;        /* hairlines */
-    --rule-strong: #14110F; /* section rules */
-    --accent: #D4271C;      /* vermilion red, the ONE accent */
-    --accent-ink: #FFFFFF;
-    --positive: #2F6B4F;
-    --negative: #B3261E;
-    --warning: #A8741A;
-    --pitch: #E4E0D2;       /* pitch fill */
-    --pitch-line: rgba(20, 17, 15, 0.2);
+    --bg: #F7F8FA;
+    --panel: #FFFFFF;
+    --panel-2: #F1F3F6;
+    --border: #E3E6EB;
+    --text: #0F1419;
+    --text-2: #5B6572;
+    --text-3: #8A93A0;
+    --accent: #2F6BFF;
+    --accent-soft: #E8EFFF;
+    --positive: #1F9D6B;
+    --negative: #D64545;
+    --warning: #D89614;
+    --pitch: #EEF1F5;
+    --pitch-line: #C5CBD4;
 
-    /* Mappings for legacy theme classes */
-    --background: var(--bg);
-    --foreground: var(--ink);
-    --card: var(--bg-raised);
-    --card-foreground: var(--ink);
-    --surface: var(--bg-sunken);
-    --surface-subtle: var(--bg-sunken);
-    --surface-highlight: var(--bg-raised);
-    --border: var(--rule);
-    --input: var(--rule);
-    --ring: var(--accent);
-    --muted: var(--bg-sunken);
-    --muted-foreground: var(--ink-3);
+    /* Compatibility mappings */
+    --bg-raised: var(--panel);
+    --bg-sunken: var(--panel-2);
+    --ink: var(--text);
+    --ink-2: var(--text-2);
+    --ink-3: var(--text-3);
+    --rule: var(--border);
+    --rule-strong: #C4C9D2;
+    --accent-ink: #FFFFFF;
   }
 
   * {
-    border-color: var(--rule);
+    border-color: var(--border);
   }
 
   body {
     background-color: var(--bg);
-    color: var(--ink);
-    font-family: 'Inter', 'Cairo', system-ui, -apple-system, sans-serif;
-    letter-spacing: -0.011em;
+    color: var(--text);
+    font-family: 'Inter', 'Geist', 'IBM Plex Sans Arabic', system-ui, -apple-system, sans-serif;
+    letter-spacing: -0.01em;
     -webkit-font-smoothing: antialiased;
   }
 }
 
-/* Editorial Print Archive Hairline and Typography Utilities */
-.editorial-headline {
-  font-family: 'Fraunces', 'Playfair Display', 'Amiri', Georgia, serif;
-  letter-spacing: -0.025em;
-  line-height: 1.05;
+/* Modern App Utilities */
+.panel {
+  background-color: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
 }
 
-.editorial-serif {
-  font-family: 'Fraunces', 'Playfair Display', 'Amiri', Georgia, serif;
+:root[data-theme="light"] .panel,
+:root.light .panel {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
 }
 
-.editorial-mono {
-  font-family: 'JetBrains Mono', 'IBM Plex Mono', monospace;
-  letter-spacing: 0.06em;
+.tabular-nums {
   font-variant-numeric: tabular-nums;
+  font-family: 'JetBrains Mono', 'Inter', monospace;
 }
 
-.editorial-hairline {
-  border-width: 1px;
-  border-color: var(--rule);
-}
-
-.editorial-rule-strong {
-  border-top-width: 2px;
-  border-color: var(--rule-strong);
-}
-
-/* Subtle paper grain texture simulation in light mode */
-:root[data-theme="light"] body,
-:root.light body {
-  background-image: radial-gradient(rgba(20, 17, 15, 0.03) 1px, transparent 0);
-  background-size: 24px 24px;
-}
-
-/* Custom compact scrollbars */
+/* Compact modern scrollbars */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--rule);
-  border-radius: 2px;
+  background: var(--border);
+  border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--ink-3);
-}
-
-.tabular-nums {
-  font-variant-numeric: tabular-nums;
+  background: var(--text-3);
 }

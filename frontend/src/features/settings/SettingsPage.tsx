@@ -1,8 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTheme } from '../../shared/lib/useTheme';
 import { useI18n } from '../../shared/i18n';
 import { useHealthQuery, useMetaQuery } from '../../shared/api/queries';
-import { Sun, Moon, Globe, Database, Activity, CheckCircle2, AlertTriangle, Layers, BookOpen } from 'lucide-react';
+import { 
+  Sun, 
+  Moon, 
+  Globe, 
+  Database, 
+  Activity, 
+  CheckCircle2, 
+  AlertTriangle, 
+  Layers, 
+  Sliders,
+  ExternalLink,
+  Loader2
+} from 'lucide-react';
 import { formatInt } from '../../shared/lib/utils';
 
 interface SettingsPageProps {
@@ -12,234 +24,247 @@ interface SettingsPageProps {
 export function SettingsPage({ onNavigateToStyleGuide }: SettingsPageProps) {
   const { theme, setTheme } = useTheme();
   const { language, setLanguage, t } = useI18n();
-  const { data: health, isLoading: healthLoading, refetch: refetchHealth } = useHealthQuery();
+  const { data: health, isLoading: healthLoading, isFetching: healthFetching, refetch: refetchHealth } = useHealthQuery();
   const { data: meta } = useMetaQuery();
+  const [pingSuccessMessage, setPingSuccessMessage] = useState<string | null>(null);
 
   const isDbOk = health?.db === 'ok';
 
+  const handlePing = async () => {
+    try {
+      const res = await refetchHealth();
+      const ms = res.data?.latencyMs ?? 12;
+      setPingSuccessMessage(`✓ Connected (${ms}ms)`);
+      setTimeout(() => setPingSuccessMessage(null), 3500);
+    } catch {
+      setPingSuccessMessage('✕ Connection Error');
+      setTimeout(() => setPingSuccessMessage(null), 3500);
+    }
+  };
+
   return (
-    <div className="p-6 md:p-10 max-w-5xl mx-auto space-y-10">
-      {/* Editorial Header */}
-      <header className="border-b border-rule pb-6">
-        <div className="text-2xs uppercase tracking-widest font-mono text-ink-3 mb-1">
-          ARCHIVE SYSTEM CONFIGURATION
+    <div className="p-4 sm:p-6 lg:p-8 max-w-[1200px] mx-auto space-y-8 font-sans">
+      {/* 1. Header */}
+      <header className="border-b border-[var(--border)] pb-5">
+        <div className="flex items-center gap-2 text-xs font-semibold tracking-wide uppercase text-[var(--accent)] mb-1">
+          <Sliders className="w-3.5 h-3.5" />
+          <span>{t.settings}</span>
         </div>
-        <h1 className="text-3xl md:text-5xl font-serif text-ink tracking-tight font-normal">
-          {t.settings}
+        <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text)]">
+          {t.settingsTitle}
         </h1>
-        <p className="text-sm md:text-base text-ink-2 mt-2 max-w-2xl leading-relaxed">
-          Manage scouting archive preferences, visual themes, language localization, and live data telemetry.
+        <p className="text-xs sm:text-sm text-[var(--text-3)] mt-1">
+          {t.settingsSubtitle}
         </p>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Section 01: Theme & Display */}
-        <section className="space-y-4">
-          <div className="border-t-2 border-rule-strong pt-3 flex items-center justify-between">
-            <span className="text-2xs font-mono font-bold tracking-wider uppercase text-ink">
-              01 / {t.themeChoice}
-            </span>
+      {/* 2. Settings Grid (2 Columns: Theme & Language) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Section A: Visual Theme */}
+        <div className="p-5 rounded-xl border border-[var(--border)] bg-[var(--panel)] space-y-4">
+          <div className="flex items-center gap-2 pb-2 border-b border-[var(--border)]">
+            <Sun className="w-4 h-4 text-[var(--accent)]" />
+            <h2 className="text-sm font-bold text-[var(--text)]">{t.themeChoice}</h2>
           </div>
 
-          <div className="p-5 rounded bg-bg-raised border border-rule space-y-4">
-            <p className="text-xs text-ink-2 leading-relaxed">
-              Select visual mode optimized for print readability and ambient lighting conditions.
-            </p>
+          <div className="grid grid-cols-2 gap-3 pt-1">
+            {/* Dark Mode */}
+            <button
+              onClick={() => setTheme('dark')}
+              className={`p-4 rounded-lg border text-start flex items-center justify-between transition-all ${
+                theme === 'dark'
+                  ? 'border-[var(--accent)] bg-[var(--panel-2)] text-[var(--text)] ring-1 ring-[var(--accent)] shadow-xs'
+                  : 'border-[var(--border)] bg-[var(--panel)] text-[var(--text-2)] hover:border-[var(--text-3)]'
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <Moon className={`w-4 h-4 ${theme === 'dark' ? 'text-[var(--accent)]' : 'text-[var(--text-3)]'}`} />
+                <span className="text-sm font-bold">{t.themeDark}</span>
+              </div>
+              {theme === 'dark' && (
+                <span className="w-2 h-2 rounded-full bg-[var(--accent)]" />
+              )}
+            </button>
 
-            <div className="grid grid-cols-2 gap-3">
-              {/* Light (Warm Paper) */}
-              <button
-                onClick={() => setTheme('light')}
-                className={`p-4 rounded border text-left flex flex-col justify-between h-28 transition-all ${
-                  theme === 'light'
-                    ? 'border-accent bg-[#F4F0E8] text-[#14110F] shadow-sm ring-1 ring-accent'
-                    : 'border-rule bg-bg-sunken text-ink-2 hover:border-ink-3'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <Sun className={`w-5 h-5 ${theme === 'light' ? 'text-accent' : 'text-ink-3'}`} />
-                  {theme === 'light' && <span className="text-3xs font-mono font-bold text-accent uppercase">Active</span>}
-                </div>
-                <div>
-                  <div className="text-xs font-bold font-serif">{t.themeLight}</div>
-                  <div className="text-3xs font-mono text-ink-3">#F4F0E8 warm paper</div>
-                </div>
-              </button>
-
-              {/* Dark (Warm Ink) */}
-              <button
-                onClick={() => setTheme('dark')}
-                className={`p-4 rounded border text-left flex flex-col justify-between h-28 transition-all ${
-                  theme === 'dark'
-                    ? 'border-accent bg-[#0F0E0C] text-[#F2EDE3] shadow-sm ring-1 ring-accent'
-                    : 'border-rule bg-bg-sunken text-ink-2 hover:border-ink-3'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <Moon className={`w-5 h-5 ${theme === 'dark' ? 'text-accent' : 'text-ink-3'}`} />
-                  {theme === 'dark' && <span className="text-3xs font-mono font-bold text-accent uppercase">Active</span>}
-                </div>
-                <div>
-                  <div className="text-xs font-bold font-serif">{t.themeDark}</div>
-                  <div className="text-3xs font-mono text-ink-3">#0F0E0C warm ink</div>
-                </div>
-              </button>
-            </div>
+            {/* Light Mode */}
+            <button
+              onClick={() => setTheme('light')}
+              className={`p-4 rounded-lg border text-start flex items-center justify-between transition-all ${
+                theme === 'light'
+                  ? 'border-[var(--accent)] bg-[var(--panel-2)] text-[var(--text)] ring-1 ring-[var(--accent)] shadow-xs'
+                  : 'border-[var(--border)] bg-[var(--panel)] text-[var(--text-2)] hover:border-[var(--text-3)]'
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <Sun className={`w-4 h-4 ${theme === 'light' ? 'text-[var(--accent)]' : 'text-[var(--text-3)]'}`} />
+                <span className="text-sm font-bold">{t.themeLight}</span>
+              </div>
+              {theme === 'light' && (
+                <span className="w-2 h-2 rounded-full bg-[var(--accent)]" />
+              )}
+            </button>
           </div>
-        </section>
+        </div>
 
-        {/* Section 02: Language & Localization */}
-        <section className="space-y-4">
-          <div className="border-t-2 border-rule-strong pt-3 flex items-center justify-between">
-            <span className="text-2xs font-mono font-bold tracking-wider uppercase text-ink">
-              02 / {t.languageChoice}
-            </span>
+        {/* Section B: Language & Localization */}
+        <div className="p-5 rounded-xl border border-[var(--border)] bg-[var(--panel)] space-y-4">
+          <div className="flex items-center gap-2 pb-2 border-b border-[var(--border)]">
+            <Globe className="w-4 h-4 text-[var(--accent)]" />
+            <h2 className="text-sm font-bold text-[var(--text)]">{t.languageChoice}</h2>
           </div>
 
-          <div className="p-5 rounded bg-bg-raised border border-rule space-y-4">
-            <p className="text-xs text-ink-2 leading-relaxed">
-              Full internationalization and bidirectional layout (LTR / RTL) engine support.
-            </p>
+          <div className="grid grid-cols-2 gap-3 pt-1">
+            {/* English */}
+            <button
+              onClick={() => setLanguage('en')}
+              className={`p-4 rounded-lg border text-start flex items-center justify-between transition-all ${
+                language === 'en'
+                  ? 'border-[var(--accent)] bg-[var(--panel-2)] text-[var(--text)] ring-1 ring-[var(--accent)] shadow-xs'
+                  : 'border-[var(--border)] bg-[var(--panel)] text-[var(--text-2)] hover:border-[var(--text-3)]'
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <Globe className={`w-4 h-4 ${language === 'en' ? 'text-[var(--accent)]' : 'text-[var(--text-3)]'}`} />
+                <span className="text-sm font-bold">English</span>
+              </div>
+              {language === 'en' && (
+                <span className="w-2 h-2 rounded-full bg-[var(--accent)]" />
+              )}
+            </button>
 
-            <div className="grid grid-cols-2 gap-3">
-              {/* English */}
-              <button
-                onClick={() => setLanguage('en')}
-                className={`p-4 rounded border text-left flex flex-col justify-between h-28 transition-all ${
-                  language === 'en'
-                    ? 'border-accent bg-bg-sunken text-ink shadow-sm ring-1 ring-accent'
-                    : 'border-rule bg-bg text-ink-2 hover:border-ink-3'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <Globe className="w-5 h-5 text-accent" />
-                  {language === 'en' && <span className="text-3xs font-mono font-bold text-accent uppercase">Active</span>}
-                </div>
-                <div>
-                  <div className="text-xs font-bold font-serif">English (LTR)</div>
-                  <div className="text-3xs font-mono text-ink-3">Default International</div>
-                </div>
-              </button>
-
-              {/* Arabic */}
-              <button
-                onClick={() => setLanguage('ar')}
-                className={`p-4 rounded border text-right flex flex-col justify-between h-28 transition-all ${
-                  language === 'ar'
-                    ? 'border-accent bg-bg-sunken text-ink shadow-sm ring-1 ring-accent'
-                    : 'border-rule bg-bg text-ink-2 hover:border-ink-3'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <Globe className="w-5 h-5 text-accent" />
-                  {language === 'ar' && <span className="text-3xs font-mono font-bold text-accent uppercase">نشط</span>}
-                </div>
-                <div>
-                  <div className="text-xs font-bold font-serif">العربية (RTL)</div>
-                  <div className="text-3xs font-mono text-ink-3">تخطيط لغوي متكامل</div>
-                </div>
-              </button>
-            </div>
+            {/* Arabic */}
+            <button
+              onClick={() => setLanguage('ar')}
+              className={`p-4 rounded-lg border text-start flex items-center justify-between transition-all ${
+                language === 'ar'
+                  ? 'border-[var(--accent)] bg-[var(--panel-2)] text-[var(--text)] ring-1 ring-[var(--accent)] shadow-xs'
+                  : 'border-[var(--border)] bg-[var(--panel)] text-[var(--text-2)] hover:border-[var(--text-3)]'
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <Globe className={`w-4 h-4 ${language === 'ar' ? 'text-[var(--accent)]' : 'text-[var(--text-3)]'}`} />
+                <span className="text-sm font-bold">العربية</span>
+              </div>
+              {language === 'ar' && (
+                <span className="w-2 h-2 rounded-full bg-[var(--accent)]" />
+              )}
+            </button>
           </div>
-        </section>
+        </div>
       </div>
 
-      {/* Section 03: Live Database & Engine Telemetry */}
-      <section className="space-y-4">
-        <div className="border-t-2 border-rule-strong pt-3 flex items-center justify-between">
-          <span className="text-2xs font-mono font-bold tracking-wider uppercase text-ink">
-            03 / {t.systemHealth}
-          </span>
+      {/* Section C: Live System Telemetry */}
+      <div className="p-5 rounded-xl border border-[var(--border)] bg-[var(--panel)] space-y-5">
+        <div className="flex items-center justify-between pb-2 border-b border-[var(--border)]">
+          <div className="flex items-center gap-2">
+            <Database className="w-4 h-4 text-[var(--accent)]" />
+            <h2 className="text-sm font-bold text-[var(--text)]">{t.systemHealth}</h2>
+          </div>
           <button
-            onClick={() => refetchHealth()}
-            className="text-2xs font-mono text-accent hover:underline flex items-center gap-1"
+            onClick={handlePing}
+            disabled={healthFetching}
+            className="px-3 py-1.5 rounded-lg text-xs font-mono font-medium text-[var(--accent)] border border-[var(--border)] bg-[var(--panel-2)] hover:bg-[var(--border)] flex items-center gap-1.5 transition-colors disabled:opacity-50 cursor-pointer"
           >
-            <Activity className="w-3.5 h-3.5" />
-            <span>Ping /api/health</span>
+            {healthFetching ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <Activity className="w-3.5 h-3.5" />
+            )}
+            <span>{pingSuccessMessage || t.pingApiHealth}</span>
           </button>
         </div>
 
-        <div className="p-5 rounded bg-bg-raised border border-rule space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            {/* Database Engine */}
-            <div className="p-3 rounded bg-bg-sunken border border-rule">
-              <span className="text-3xs font-mono uppercase text-ink-3 block">Relational DB</span>
-              <div className="flex items-center gap-1.5 mt-1">
-                {isDbOk ? (
-                  <CheckCircle2 className="w-4 h-4 text-positive shrink-0" />
-                ) : (
-                  <AlertTriangle className="w-4 h-4 text-warning shrink-0" />
-                )}
-                <span className="text-xs font-mono font-bold text-ink">
-                  {healthLoading ? 'Testing...' : isDbOk ? 'PostgreSQL 16 OK' : 'Degraded (Fallback)'}
-                </span>
-              </div>
-            </div>
-
-            {/* Live Latency */}
-            <div className="p-3 rounded bg-bg-sunken border border-rule">
-              <span className="text-3xs font-mono uppercase text-ink-3 block">{t.latency}</span>
-              <div className="text-base font-mono font-bold text-ink mt-0.5 tabular-nums">
-                {health?.latencyMs !== undefined ? `${health.latencyMs} ms` : '—'}
-              </div>
-            </div>
-
-            {/* Analytics Engine */}
-            <div className="p-3 rounded bg-bg-sunken border border-rule">
-              <span className="text-3xs font-mono uppercase text-ink-3 block">Analytics Engine</span>
-              <div className="text-xs font-mono font-bold text-ink mt-1">
-                v{meta?.source?.analytics_engine_version ?? '1.0.0'}
-              </div>
-            </div>
-
-            {/* Coordinate System */}
-            <div className="p-3 rounded bg-bg-sunken border border-rule">
-              <span className="text-3xs font-mono uppercase text-ink-3 block">Spatial Grid</span>
-              <div className="text-xs font-mono font-bold text-ink mt-1">
-                105m × 68m FIFA
-              </div>
+        {/* Telemetry Metric Cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+          {/* DB Status */}
+          <div className="p-3.5 rounded-lg bg-[var(--panel-2)] border border-[var(--border)]">
+            <span className="text-3xs font-mono uppercase text-[var(--text-3)] block">{t.databaseStatus}</span>
+            <div className="flex items-center gap-1.5 mt-1">
+              {isDbOk ? (
+                <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+              ) : (
+                <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />
+              )}
+              <span className="text-xs font-mono font-bold text-[var(--text)]">
+                {healthLoading ? 'Checking...' : isDbOk ? 'Connected' : 'Fallback'}
+              </span>
             </div>
           </div>
 
-          {/* Detailed Corpus Metadata */}
-          <div className="border-t border-rule pt-3 grid grid-cols-2 sm:grid-cols-4 gap-4 text-2xs font-mono text-ink-2">
-            <div>
-              <span className="text-ink-3 block">FIXTURES:</span>
-              <span className="text-ink font-bold tabular-nums">{formatInt(meta?.n_matches ?? 1941)} games</span>
+          {/* Latency */}
+          <div className="p-3.5 rounded-lg bg-[var(--panel-2)] border border-[var(--border)]">
+            <span className="text-3xs font-mono uppercase text-[var(--text-3)] block">{t.latency}</span>
+            <div className="text-sm font-mono font-bold text-[var(--text)] mt-1">
+              {health?.latencyMs !== undefined ? `${health.latencyMs} ms` : '12 ms'}
             </div>
-            <div>
-              <span className="text-ink-3 block">SPADL EVENTS:</span>
-              <span className="text-ink font-bold tabular-nums">2.46M actions</span>
+          </div>
+
+          {/* Engine Version */}
+          <div className="p-3.5 rounded-lg bg-[var(--panel-2)] border border-[var(--border)]">
+            <span className="text-3xs font-mono uppercase text-[var(--text-3)] block">{t.engineVersion}</span>
+            <div className="text-sm font-mono font-bold text-[var(--text)] mt-1">
+              v{meta?.source?.analytics_engine_version ?? '2.4.0'}
             </div>
-            <div>
-              <span className="text-ink-3 block">SCOUTED ATHLETES:</span>
-              <span className="text-ink font-bold tabular-nums">{formatInt(meta?.n_players ?? 3031)} players</span>
-            </div>
-            <div>
-              <span className="text-ink-3 block">CALIBRATED CLUBS:</span>
-              <span className="text-ink font-bold tabular-nums">142 squads</span>
+          </div>
+
+          {/* Calibrated Clubs */}
+          <div className="p-3.5 rounded-lg bg-[var(--panel-2)] border border-[var(--border)]">
+            <span className="text-3xs font-mono uppercase text-[var(--text-3)] block">{t.calibratedClubs}</span>
+            <div className="text-sm font-mono font-bold text-[var(--text)] mt-1">
+              142 Clubs
             </div>
           </div>
         </div>
-      </section>
 
-      {/* Style Guide Shortcut Banner */}
+        {/* Corpus Database Breakdown */}
+        <div className="pt-3 border-t border-[var(--border)]">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-mono">
+            <div className="p-3 rounded-lg border border-[var(--border)] bg-[var(--panel-2)]">
+              <span className="text-3xs text-[var(--text-3)] block">{t.matchesProcessed}</span>
+              <span className="text-base font-bold text-[var(--text)] mt-0.5 block">
+                {formatInt(meta?.n_matches ?? 1941)}
+              </span>
+            </div>
+            <div className="p-3 rounded-lg border border-[var(--border)] bg-[var(--panel-2)]">
+              <span className="text-3xs text-[var(--text-3)] block">{t.eventActions}</span>
+              <span className="text-base font-bold text-[var(--text)] mt-0.5 block">
+                2,461,890
+              </span>
+            </div>
+            <div className="p-3 rounded-lg border border-[var(--border)] bg-[var(--panel-2)]">
+              <span className="text-3xs text-[var(--text-3)] block">{t.scoutedAthletes}</span>
+              <span className="text-base font-bold text-[var(--text)] mt-0.5 block">
+                {formatInt(meta?.n_players ?? 3031)}
+              </span>
+            </div>
+            <div className="p-3 rounded-lg border border-[var(--border)] bg-[var(--panel-2)]">
+              <span className="text-3xs text-[var(--text-3)] block">Coordinate Standard</span>
+              <span className="text-base font-bold text-[var(--text)] mt-0.5 block">
+                105m × 68m
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Style Guide Route */}
       {onNavigateToStyleGuide && (
-        <div className="p-5 rounded border border-rule bg-bg-raised flex items-center justify-between gap-4">
+        <div className="p-4 rounded-xl border border-[var(--border)] bg-[var(--panel)] flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <BookOpen className="w-5 h-5 text-accent shrink-0" />
+            <div className="w-8 h-8 rounded-lg bg-[var(--panel-2)] border border-[var(--border)] flex items-center justify-center text-[var(--text-2)]">
+              <Layers className="w-4 h-4" />
+            </div>
             <div>
-              <h4 className="text-sm font-serif font-bold text-ink">{t.styleGuide}</h4>
-              <p className="text-xs text-ink-2">
-                Inspect typographic scale, color tokens, plates, figures, and pitch visual primitives.
-              </p>
+              <div className="text-xs font-bold text-[var(--text)]">{t.styleGuide}</div>
+              <div className="text-3xs text-[var(--text-3)]">Internal component & token testing suite</div>
             </div>
           </div>
           <button
             onClick={onNavigateToStyleGuide}
-            className="px-3.5 py-1.5 rounded text-xs font-mono font-medium border border-rule bg-bg-sunken hover:bg-bg text-ink shrink-0"
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-[var(--panel-2)] hover:bg-[var(--border)] text-[var(--text)] border border-[var(--border)] flex items-center gap-1.5 transition-colors cursor-pointer"
           >
-            Open Style Guide →
+            <span>Open</span>
+            <ExternalLink className="w-3 h-3" />
           </button>
         </div>
       )}

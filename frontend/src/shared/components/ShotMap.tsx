@@ -22,7 +22,7 @@ export function ShotMap({
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center p-12 text-2xs font-mono text-ink-3">
+      <div className="flex items-center justify-center p-12 text-3xs font-mono text-[var(--text-3)]">
         Loading Expected Goals Shot Dispersion...
       </div>
     );
@@ -35,46 +35,46 @@ export function ShotMap({
   const xgPerShot = totalShots > 0 ? totalXg / totalShots : 0;
 
   return (
-    <div className="flex flex-col gap-2 w-full">
+    <div className="flex flex-col gap-2.5 w-full">
       {showSummaryBar && (
-        <div className="flex items-center justify-between text-2xs font-mono text-zinc-400 border-b border-zinc-800/60 pb-2">
+        <div className="flex flex-wrap items-center justify-between gap-2 text-3xs font-mono text-[var(--text-2)] border-b border-[var(--border)] pb-2.5">
           <div className="flex items-center gap-4">
             <div>
-              <span className="text-zinc-500">Shots: </span>
-              <span className="text-zinc-200 font-semibold">{totalShots}</span>
+              <span className="text-[var(--text-3)]">Shots: </span>
+              <span className="text-[var(--text)] font-semibold">{totalShots}</span>
             </div>
             <div>
-              <span className="text-zinc-500">Goals: </span>
-              <span className="text-emerald-400 font-semibold">{goals}</span>
+              <span className="text-[var(--text-3)]">Goals: </span>
+              <span className="text-emerald-500 font-semibold">{goals}</span>
             </div>
             <div>
-              <span className="text-zinc-500">xG: </span>
-              <span className="text-zinc-200 font-semibold">{formatNumber(totalXg, 2)}</span>
+              <span className="text-[var(--text-3)]">xG: </span>
+              <span className="text-[var(--text)] font-semibold">{formatNumber(totalXg, 2)}</span>
             </div>
             <div>
-              <span className="text-zinc-500">xG/Shot: </span>
-              <span className="text-zinc-200">{formatNumber(xgPerShot, 2)}</span>
+              <span className="text-[var(--text-3)]">xG/Shot: </span>
+              <span className="text-[var(--text)]">{formatNumber(xgPerShot, 2)}</span>
             </div>
           </div>
-          <div className="flex items-center gap-3 text-2xs">
-            <span className="inline-flex items-center gap-1 text-emerald-400">
-              <span className="w-2 h-2 rounded-full bg-emerald-400" /> Goal
+          <div className="flex items-center gap-3">
+            <span className="inline-flex items-center gap-1.5 text-emerald-500">
+              <span className="w-2 h-2 rounded-full bg-emerald-500" /> Goal
             </span>
-            <span className="inline-flex items-center gap-1 text-zinc-400">
-              <span className="w-2 h-2 rounded-full bg-zinc-600 border border-zinc-500" /> Non-Goal
+            <span className="inline-flex items-center gap-1.5 text-[var(--text-3)]">
+              <span className="w-2 h-2 rounded-full bg-[var(--text-3)]" /> Non-Goal
             </span>
-            <span className="text-zinc-500">● Size = xG</span>
+            <span className="text-[var(--text-3)]">● Radius ∝ √xG</span>
           </div>
         </div>
       )}
 
-      <div className="relative">
+      <div className="relative rounded-lg overflow-hidden border border-[var(--border)] bg-[var(--pitch)] p-2">
         <PitchCanvas className={className} showThirds showHalfSpaces>
           {/* Shot glyphs */}
           <g>
             {validShots.map((shot, idx) => {
               // Scale radius by square root of xG (area proportional to expected goal probability)
-              const radius = Math.max(0.8, Math.min(4.5, Math.sqrt(shot.xg || 0.05) * 3.6));
+              const radius = Math.max(0.9, Math.min(4.2, Math.sqrt(shot.xg || 0.05) * 3.6));
               const isGoal = shot.is_goal;
 
               return (
@@ -92,7 +92,7 @@ export function ShotMap({
                         cy={shot.y}
                         r={radius + 1.2}
                         fill="none"
-                        stroke="var(--accent)"
+                        stroke="#10B981"
                         strokeWidth="0.4"
                         opacity="0.8"
                       />
@@ -101,8 +101,8 @@ export function ShotMap({
                         cx={shot.x}
                         cy={shot.y}
                         r={radius}
-                        fill="var(--accent)"
-                        stroke="var(--ink)"
+                        fill="#10B981"
+                        stroke="#ffffff"
                         strokeWidth="0.3"
                       />
                     </>
@@ -113,7 +113,7 @@ export function ShotMap({
                       r={radius}
                       fill="rgba(148, 163, 184, 0.45)"
                       stroke="#94a3b8"
-                      strokeWidth="0.3"
+                      strokeWidth="0.25"
                     />
                   )}
                 </g>
@@ -125,38 +125,38 @@ export function ShotMap({
         {/* Hover Shot Tooltip */}
         {hoveredShot && (
           <div
-            className="absolute bottom-3 left-3 z-20 rounded border border-zinc-700 bg-zinc-900/95 p-2.5 shadow-xl text-xs font-mono text-zinc-200 pointer-events-none backdrop-blur"
+            className="absolute bottom-3 left-3 z-20 rounded-lg border border-[var(--border)] bg-[var(--panel)] p-3 shadow-xl text-xs font-mono text-[var(--text)] pointer-events-none backdrop-blur-md"
             style={{ maxWidth: 260 }}
           >
-            <div className="flex items-center justify-between border-b border-zinc-800 pb-1 mb-1.5 font-sans">
-              <span className="font-semibold text-zinc-100">{hoveredShot.player?.name ?? 'Player'}</span>
-              <span className="text-zinc-400 text-2xs">{hoveredShot.minute?.toFixed(0)}&apos;</span>
+            <div className="flex items-center justify-between border-b border-[var(--border)] pb-1 mb-2 font-sans">
+              <span className="font-bold text-[var(--text)]">{hoveredShot.player?.name ?? 'Player'}</span>
+              <span className="text-[var(--text-3)] text-3xs font-mono">{hoveredShot.minute?.toFixed(0)}&apos;</span>
             </div>
-            <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-2xs">
+            <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 text-3xs">
               <div>
-                <span className="text-zinc-500">xG Value:</span>{' '}
-                <span className="text-emerald-400 font-bold">{formatNumber(hoveredShot.xg, 3)}</span>
+                <span className="text-[var(--text-3)]">xG Value:</span>{' '}
+                <span className="text-emerald-500 font-bold">{formatNumber(hoveredShot.xg, 3)}</span>
               </div>
               <div>
-                <span className="text-zinc-500">Outcome:</span>{' '}
-                <span className={hoveredShot.is_goal ? 'text-emerald-400 font-semibold' : 'text-zinc-400'}>
-                  {hoveredShot.is_goal ? 'Goal ⚽' : 'Saved / Blocked'}
+                <span className="text-[var(--text-3)]">Outcome:</span>{' '}
+                <span className={hoveredShot.is_goal ? 'text-emerald-500 font-bold' : 'text-[var(--text-2)]'}>
+                  {hoveredShot.is_goal ? 'Goal ⚽' : 'Saved / Missed'}
                 </span>
               </div>
               <div>
-                <span className="text-zinc-500">Body Part:</span>{' '}
-                <span className="text-zinc-300">{hoveredShot.bodypart || 'Foot'}</span>
+                <span className="text-[var(--text-3)]">Body Part:</span>{' '}
+                <span className="text-[var(--text)]">{hoveredShot.bodypart || 'Foot'}</span>
               </div>
               <div>
-                <span className="text-zinc-500">Type:</span>{' '}
-                <span className="text-zinc-300">{hoveredShot.shot_type || 'Open Play'}</span>
+                <span className="text-[var(--text-3)]">Type:</span>{' '}
+                <span className="text-[var(--text)]">{hoveredShot.shot_type || 'Open Play'}</span>
               </div>
               {hoveredShot.assister && (
-                <div className="col-span-2 pt-0.5 border-t border-zinc-800/80">
-                  <span className="text-zinc-500">Key Pass:</span>{' '}
-                  <span className="text-zinc-300">{hoveredShot.assister.name}</span>
+                <div className="col-span-2 pt-1 border-t border-[var(--border)]">
+                  <span className="text-[var(--text-3)]">Assister:</span>{' '}
+                  <span className="text-[var(--text)] font-semibold">{hoveredShot.assister.name}</span>
                   {hoveredShot.xa !== undefined && (
-                    <span className="text-zinc-500 ml-1">(xA: {formatNumber(hoveredShot.xa, 2)})</span>
+                    <span className="text-[var(--text-3)] ml-1">(xA: {formatNumber(hoveredShot.xa, 2)})</span>
                   )}
                 </div>
               )}

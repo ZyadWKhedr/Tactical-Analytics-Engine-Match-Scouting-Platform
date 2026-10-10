@@ -7,7 +7,7 @@ export interface Translations {
   brandName: string;
   brandSubtitle: string;
   scoutingModules: string;
-  executiveHome: string;
+  home: string;
   opponentReport: string;
   squadRatings: string;
   playerScouting: string;
@@ -19,72 +19,114 @@ export interface Translations {
   scope: string;
   allCompetitions: string;
   quickSearch: string;
-  pgActive: string;
+  liveDb: string;
   dbDisconnected: string;
   themeToggle: string;
   language: string;
-  simpleView: string;
-  advancedView: string;
 
-  // Home Page & Readability Rules
-  databaseMatches: string;
-  eventCorpus: string;
-  activeCompetitions: string;
-  scoutedPlayers: string;
-  currentFocusOpponent: string;
-  sample: string;
-  overallRating: string;
-  attackPower: string;
-  defenceRating: string;
-  dangerCreated: string;
-  zoneResistance: string;
-  keyVulnerability: string;
-  primaryStrength: string;
-  fullBlueprintReport: string;
-  squadRatingsLeaderboard: string;
-  viewFullTable: string;
-  viewAll: string;
-  dataPipelineHealth: string;
-  analystWorkflow: string;
-  analystWorkflowDesc: string;
-  keyTakeaways: string;
-  howToReadThis: string;
+  // Home Page
+  nextMatch: string;
+  homeHeadline: string;
+  homeQuestion: string;
+  fullScoutReport: string;
+  simulateMatchup: string;
+  attackingDangerCreation: string;
+  attackingDangerSubtitle: string;
+  keyMatchInsights: string;
+  clickToHighlight: string;
+  seeChart: string;
+  leagueBenchmarkForm: string;
+  viewAllStandings: string;
+  attackShareByChannel: string;
+  attackShareSubtitle: string;
+  leftFlank: string;
+  centralChannel: string;
+  rightFlank: string;
+  focus: string;
+  opponentRecentForm: string;
+  recentFormSubtitle: string;
+  homeMatch: string;
+  awayMatch: string;
 
   // Opponent Report
-  playstyleFingerprint: string;
-  playstyle: string;
-  conf: string;
-  strengths: string;
-  weaknesses: string;
-  situationalPressTriggers: string;
-  pressBlindSpots: string;
-  keyPlayerThreats: string;
-  tacticalGamePlan: string;
-  pitchZones: string;
-  shotMaps: string;
-  passingNetwork: string;
-  blueprintTendencies: string;
-  vulnerabilityIndex: string;
+  overviewTab: string;
+  attackTab: string;
+  defenceTab: string;
+  buildupTab: string;
+  setpiecesTab: string;
+  opponentQuestion: string;
+  thingsToExploit: string;
+  threatsToNeutralize: string;
+  tacticalBlueprint: string;
+  shotLocationsXg: string;
+  passingNetworkTopology: string;
+  minPassesFilter: string;
+  setPieceVulnerabilities: string;
+  inswingingCorners: string;
+  outswingingCorners: string;
+  aerialDuelSuccess: string;
+  directFreekickThreat: string;
+
+  // Squad Ratings
+  squadRatingsQuestion: string;
+  attackVsDefenceTitle: string;
+  rankedStandings: string;
+  quadrantTopRight: string;
+  quadrantTopLeft: string;
+  quadrantBottomRight: string;
+  quadrantBottomLeft: string;
+
+  // Player Scouting
+  playerScoutingQuestion: string;
+  scoutingCandidates: string;
+  allPositions: string;
+  forwards: string;
+  midfielders: string;
+  defenders: string;
+  goalkeepers: string;
+  scoutingVerdict: string;
 
   // Matchup Simulator
+  matchupQuestion: string;
   teamA: string;
   teamB: string;
-  h2hSim: string;
+  yourTeamFocus: string;
+  opponentSquad: string;
   ratingDelta: string;
-  phaseExploitation: string;
-  tacticalMatchupSim: string;
+  simulationForecast: string;
+  primaryEdge: string;
+  criticalZone: string;
+  battlegroundPitch: string;
+  tacticalBreakdown: string;
+  phaseGaps: string;
   headToHeadHistory: string;
   noH2HHistory: string;
+  possession: string;
+  highPress: string;
+  directSpeed: string;
+  draw: string;
+  simulationOdds: string;
+  runsCount: string;
+  attackingDirection: string;
+  vulnerability: string;
+  evenFriction: string;
 
   // Settings & System
-  systemHealth: string;
-  databaseStatus: string;
-  engineVersion: string;
-  latency: string;
+  settingsTitle: string;
+  settingsSubtitle: string;
   themeChoice: string;
   themeLight: string;
   themeDark: string;
   languageChoice: string;
+  systemHealth: string;
+  pingApiHealth: string;
+  databaseStatus: string;
+  engineVersion: string;
+  latency: string;
+  matchesProcessed: string;
+  eventActions: string;
+  scoutedAthletes: string;
+  calibratedClubs: string;
 
   // Common UI
   rank: string;
@@ -92,8 +134,6 @@ export interface Translations {
   rating: string;
   attack: string;
   defence: string;
-  archetype: string;
-  scout: string;
   matches: string;
   shots: string;
   goals: string;
@@ -101,16 +141,34 @@ export interface Translations {
   xa: string;
   minutes: string;
   role: string;
+  inspect: string;
+  close: string;
+  chanceCreation: string;
+  progression: string;
+  retention: string;
+  dossier: string;
+  percentileProfile: string;
+  discoverView: string;
+  tableView: string;
+  xgTrendChart: string;
+  matchCards: string;
+  fullTable: string;
+  xgCreated: string;
+  xgConceded: string;
+  venue: string;
+  differential: string;
   retryQuery: string;
   noRecords: string;
   loading: string;
+  less: string;
+  more: string;
 }
 
 const en: Translations = {
-  brandName: 'TACTICAL OS',
-  brandSubtitle: 'Match Intelligence Archive',
+  brandName: 'Tactical OS',
+  brandSubtitle: 'Match Intelligence Platform',
   scoutingModules: 'Scouting Modules',
-  executiveHome: 'Executive Home',
+  home: 'Home',
   opponentReport: 'Opponent Report',
   squadRatings: 'Squad Ratings',
   playerScouting: 'Player Scouting',
@@ -121,183 +179,295 @@ const en: Translations = {
   scope: 'Scope:',
   allCompetitions: 'All Competitions',
   quickSearch: 'Quick search (⌘K)...',
-  pgActive: 'Database Connected',
+  liveDb: 'Live DB',
   dbDisconnected: 'DB Offline',
-  themeToggle: 'Toggle light/dark theme',
+  themeToggle: 'Toggle theme',
   language: 'Language',
-  simpleView: 'Simple View',
-  advancedView: 'Advanced View',
 
-  databaseMatches: 'Database Fixtures',
-  eventCorpus: 'SPADL Action Corpus',
-  activeCompetitions: 'Competitions',
-  scoutedPlayers: 'Scouted Players',
-  currentFocusOpponent: 'Featured Opponent',
-  sample: 'Sample',
-  overallRating: 'Overall Rating',
-  attackPower: 'Attacking Threat',
-  defenceRating: 'Defensive Resilience',
-  dangerCreated: 'Danger Created',
-  zoneResistance: 'Spatial Resistance',
-  keyVulnerability: 'Primary Vulnerability',
-  primaryStrength: 'Key Tactical Strength',
-  fullBlueprintReport: 'Open Complete Dossier',
-  squadRatingsLeaderboard: 'Squad Efficiency Leaderboard',
-  viewFullTable: 'View full leaderboard',
-  viewAll: 'View all',
-  dataPipelineHealth: 'Archive Infrastructure',
-  analystWorkflow: 'Coach & Scout Directive',
-  analystWorkflowDesc: 'Curated 30-second match preparation insights. Tap figures to inspect underlying tracking telemetry.',
-  keyTakeaways: 'Key Takeaways & Tactical Brief',
-  howToReadThis: 'How to read this figure',
+  nextMatch: 'NEXT MATCH',
+  homeHeadline: 'Who do we play next, and what are the 3 things to do about it?',
+  homeQuestion: 'Who do we play next, and what are the 3 things to do about it?',
+  fullScoutReport: 'Full Scout Report',
+  simulateMatchup: 'Simulate Matchup',
+  attackingDangerCreation: 'Attacking Danger Creation',
+  attackingDangerSubtitle: 'Smoothed spatial density of key passes and chance-creation actions',
+  keyMatchInsights: 'Key Match Insights',
+  clickToHighlight: 'Click to highlight',
+  seeChart: 'See visual →',
+  leagueBenchmarkForm: 'League Benchmark Form',
+  viewAllStandings: 'View all standings',
+  attackShareByChannel: 'Attack Share by Channel',
+  attackShareSubtitle: 'Share of opponent final-third entries and shot-creating actions',
+  leftFlank: 'Left Flank',
+  centralChannel: 'Central Channel',
+  rightFlank: 'Right Flank',
+  focus: 'Focus',
+  opponentRecentForm: 'Opponent Recent Form',
+  recentFormSubtitle: 'Last 5 competitive matches with scorelines and expected goals (xG)',
+  homeMatch: 'vs',
+  awayMatch: '@',
 
-  playstyleFingerprint: 'Tactical Playstyle DNA',
-  playstyle: 'Playstyle',
-  conf: 'conf',
-  strengths: 'Tactical Strengths (Top 25%)',
-  weaknesses: 'Defensive Fault Lines (Bottom 30%)',
-  situationalPressTriggers: 'Situational Pressing Triggers',
-  pressBlindSpots: 'Pressing Blind Spots',
-  keyPlayerThreats: 'Key Player Threats',
-  tacticalGamePlan: 'Recommended Tactical Game Plan',
-  pitchZones: '6×5 Pitch Zone Breakdown',
-  shotMaps: 'Shot Locations & Scoring Probability',
-  passingNetwork: 'Passing Network & Distribution',
-  blueprintTendencies: 'Tactical Tendencies & Exploitation',
-  vulnerabilityIndex: 'Vulnerability Index',
+  overviewTab: 'Overview',
+  attackTab: 'Attack',
+  defenceTab: 'Defence',
+  buildupTab: 'Build-up',
+  setpiecesTab: 'Set Pieces',
+  opponentQuestion: 'How does the opponent attack, and where are they vulnerable?',
+  thingsToExploit: 'Opportunities to Exploit',
+  threatsToNeutralize: 'Threats to Neutralize',
+  tacticalBlueprint: 'Tactical Blueprint & Tendencies',
+  shotLocationsXg: 'Shot Locations & Expected Goals (xG)',
+  passingNetworkTopology: 'Passing Network & Linkages',
+  minPassesFilter: 'Min passes:',
+  setPieceVulnerabilities: 'Set Piece Structure & Aerial Vulnerability',
+  inswingingCorners: 'Inswinging Corners',
+  outswingingCorners: 'Outswinging Corners',
+  aerialDuelSuccess: 'Aerial Duel Win Rate',
+  directFreekickThreat: 'Direct Free Kick Threat',
 
-  teamA: 'Team A (Home / Focus)',
-  teamB: 'Team B (Opponent)',
-  h2hSim: 'H2H Simulation',
-  ratingDelta: 'Rating Edge',
-  phaseExploitation: 'Phase Exploitation Vectors',
-  tacticalMatchupSim: 'Tactical Matchup Simulation',
-  headToHeadHistory: 'Historical Head-to-Head Records',
-  noH2HHistory: 'No prior head-to-head fixtures recorded in this corpus window.',
+  squadRatingsQuestion: 'Where does each squad rank on tactical effectiveness?',
+  attackVsDefenceTitle: 'Attack vs. Defence Quadrant',
+  rankedStandings: 'Ranked League Standings',
+  quadrantTopRight: 'Elite Balanced',
+  quadrantTopLeft: 'Attack Heavy',
+  quadrantBottomRight: 'Defensive Block',
+  quadrantBottomLeft: 'Underperforming',
 
-  systemHealth: 'System & Database Health',
-  databaseStatus: 'PostgreSQL Relational Storage',
-  engineVersion: 'Analytics Engine Core',
-  latency: 'Live Latency',
-  themeChoice: 'Visual Theme',
-  themeLight: 'Light (Warm Paper)',
-  themeDark: 'Dark (Warm Ink)',
-  languageChoice: 'Interface Language',
+  playerScoutingQuestion: 'Which players fit our tactical system and recruitment profile?',
+  scoutingCandidates: 'Scouted Player Candidates',
+  allPositions: 'All Positions',
+  forwards: 'Forwards',
+  midfielders: 'Midfielders',
+  defenders: 'Defenders',
+  goalkeepers: 'Goalkeepers',
+  scoutingVerdict: 'Scouting Verdict',
+
+  matchupQuestion: 'Who wins the key battles, and how do we gain the edge?',
+  teamA: 'Your Team',
+  teamB: 'Opponent Team',
+  yourTeamFocus: 'Your Team (Tactical Focus)',
+  opponentSquad: 'Opponent Squad',
+  ratingDelta: 'Rating Delta',
+  simulationForecast: 'Simulation Forecast',
+  primaryEdge: 'Primary Edge',
+  criticalZone: 'Critical Zone',
+  battlegroundPitch: 'Tactical Battleground & Vulnerability Sectors',
+  tacticalBreakdown: 'Tactical Attribute Breakdown',
+  phaseGaps: 'Phase Exploitation Gaps',
+  headToHeadHistory: 'Head-to-Head History',
+  noH2HHistory: 'No recent matches recorded in current season.',
+  possession: 'Possession Share',
+  highPress: 'High Press Intensity',
+  directSpeed: 'Direct Speed',
+  draw: 'Draw',
+  simulationOdds: 'Match Simulation Odds',
+  runsCount: '5,000 Runs',
+  attackingDirection: 'Attacking Direction: Left → Right',
+  vulnerability: 'Vulnerability',
+  evenFriction: 'Even tactical friction across all match phases.',
+
+  settingsTitle: 'Configuration & Engine Telemetry',
+  settingsSubtitle: 'Manage visual preferences, multilingual layout, and live backend telemetry.',
+  themeChoice: 'Theme & Appearance',
+  themeLight: 'Light Mode',
+  themeDark: 'Dark Mode',
+  languageChoice: 'Language & Localization',
+  systemHealth: 'Backend Infrastructure & Telemetry',
+  pingApiHealth: 'Ping API Health',
+  databaseStatus: 'Database Connection',
+  engineVersion: 'Tactical Engine',
+  latency: 'Latency',
+  matchesProcessed: 'Matches Processed',
+  eventActions: 'Event Actions (SPADL)',
+  scoutedAthletes: 'Scouted Players',
+  calibratedClubs: 'Calibrated Clubs',
 
   rank: '#',
   club: 'Club',
   rating: 'Rating',
   attack: 'Attack',
   defence: 'Defence',
-  archetype: 'Archetype',
-  scout: 'Inspect',
   matches: 'Matches',
   shots: 'Shots',
   goals: 'Goals',
-  xg: 'xG (Scoring Prob.)',
-  xa: 'xA (Assist Prob.)',
+  xg: 'xG',
+  xa: 'xA',
   minutes: 'Minutes',
   role: 'Role',
-  retryQuery: 'Retry query',
-  noRecords: 'No archive records found',
-  loading: 'Computing tactical models...',
+  inspect: 'Inspect',
+  close: 'Close',
+  chanceCreation: 'Chance Creation',
+  progression: 'Progression',
+  retention: 'Retention / Security',
+  dossier: 'Scouting Dossier',
+  percentileProfile: 'Positional Percentile Profile',
+  discoverView: 'Discover',
+  tableView: 'Table View',
+  xgTrendChart: 'xG Performance Trend',
+  matchCards: 'Match Cards',
+  fullTable: 'Full Match Log',
+  xgCreated: 'xG Created',
+  xgConceded: 'xG Conceded',
+  venue: 'Venue',
+  differential: 'xG Delta',
+  retryQuery: 'Retry',
+  noRecords: 'No records found',
+  loading: 'Loading analytics...',
+  less: 'Less',
+  more: 'More',
 };
 
 const ar: Translations = {
-  brandName: 'نظام تكتيكي',
-  brandSubtitle: 'أرشيف استخبارات المباريات',
-  scoutingModules: 'وحدات الاستكشاف',
-  executiveHome: 'لوحة التحكم الرئيسية',
+  brandName: 'نظام التحليل التكتيكي',
+  brandSubtitle: 'منصة استخبارات المباريات والكشافة',
+  scoutingModules: 'وحدات التحليل والتكتيك',
+  home: 'الرئيسية',
   opponentReport: 'تقرير الخصم',
-  squadRatings: 'تقييمات الفرق',
-  playerScouting: 'استكشاف اللاعبين',
-  matchupSimulator: 'محاكي المواجهات',
+  squadRatings: 'تقييم الفرق',
+  playerScouting: 'كشافة اللاعبين',
+  matchupSimulator: 'محاكي المواجهة',
   settings: 'الإعدادات',
   styleGuide: 'دليل التصميم',
 
   scope: 'النطاق:',
-  allCompetitions: 'جميع البطولات',
+  allCompetitions: 'جميع الدوريات والبطولات',
   quickSearch: 'بحث سريع (⌘K)...',
-  pgActive: 'قاعدة البيانات متصلة',
+  liveDb: 'قاعدة البيانات متصلة',
   dbDisconnected: 'قاعدة البيانات غير متصلة',
-  themeToggle: 'تبديل المظهر الفاتح/الداكن',
+  themeToggle: 'تبديل المظهر',
   language: 'اللغة',
-  simpleView: 'عرض مبسط',
-  advancedView: 'عرض تفصيلي',
 
-  databaseMatches: 'مباريات الأرشيف',
-  eventCorpus: 'مخزون أحداث SPADL',
-  activeCompetitions: 'البطولات النشطة',
-  scoutedPlayers: 'اللاعبون المستكشفون',
-  currentFocusOpponent: 'الخصم المحدد',
-  sample: 'العينة',
-  overallRating: 'التقييم العام',
-  attackPower: 'القوة الهجومية',
-  defenceRating: 'الصلابة الدفاعية',
-  dangerCreated: 'مستوى الخطورة المصنوعة',
-  zoneResistance: 'المقاومة المكانية',
-  keyVulnerability: 'نقطة الضعف الرئيسية',
-  primaryStrength: 'نقطة القوة الرئيسية',
-  fullBlueprintReport: 'فتح الملف التكتيكي الكامل',
-  squadRatingsLeaderboard: 'ترتيب كفاءة الفرق',
-  viewFullTable: 'عرض جدول الترتيب كاملاً',
-  viewAll: 'عرض الكل',
-  dataPipelineHealth: 'البنية التحتية للأرشيف',
-  analystWorkflow: 'توجيه المدرب والمحلل',
-  analystWorkflowDesc: 'رؤى سريعة ومختصرة للتحضير للمباراة في 30 ثانية. انقر على أي شكل لمعاينة بيانات التتبع الدقيقة.',
-  keyTakeaways: 'النقاط الجوهرية والملخص التكتيكي',
-  howToReadThis: 'كيف تقرأ هذا الشكل',
+  nextMatch: 'المباراة القادمة',
+  homeHeadline: 'من سنواجه في المباراة القادمة، وما هي الخطوات الثلاث الحاسمة؟',
+  homeQuestion: 'من سنواجه في المباراة القادمة، وما هي الخطوات الثلاث الحاسمة؟',
+  fullScoutReport: 'تقرير الكشافة الكامل',
+  simulateMatchup: 'محاكاة المواجهة التكتيكية',
+  attackingDangerCreation: 'خريطة صناعة الخطورة الهجومية',
+  attackingDangerSubtitle: 'الكثافة المكانية للتمريرات الحاسمة وفرص التسجيل الخطيرة',
+  keyMatchInsights: 'أهم الملاحظات والقرارات التكتيكية',
+  clickToHighlight: 'انقر لتحديد المنطقة على الملعب',
+  seeChart: 'عرض المخطط التكتيكي ←',
+  leagueBenchmarkForm: 'مقارنة أداء أندية الدوري',
+  viewAllStandings: 'عرض جدول الترتيب الكامل',
+  attackShareByChannel: 'توزيع الهجوم عبر الممرات',
+  attackShareSubtitle: 'نسبة الدخول للثلث الهجومي وصناعة الفرص عبر الممرات',
+  leftFlank: 'الجناح الأيسر',
+  centralChannel: 'العمق / الممر المركزي',
+  rightFlank: 'الجناح الأيمن',
+  focus: 'تركيز',
+  opponentRecentForm: 'نتائج المباريات الأخيرة للخصم',
+  recentFormSubtitle: 'آخر 5 مباريات رسمية مع نتائج الأهداف والأهداف المتوقعة xG',
+  homeMatch: 'داخل الأرض',
+  awayMatch: 'خارج الأرض',
 
-  playstyleFingerprint: 'بصمة أسلوب اللعب',
-  playstyle: 'أسلوب اللعب',
-  conf: 'ثقة',
-  strengths: 'نقاط القوة (أعلى 25%)',
-  weaknesses: 'النقاط الدفاعية الهشة (أدنى 30%)',
-  situationalPressTriggers: 'محفزات الضغط الظرفي',
-  pressBlindSpots: 'النقاط العمياء في الضغط',
-  keyPlayerThreats: 'أبرز اللاعبين خطورة',
-  tacticalGamePlan: 'خطة اللعب التكتيكية الموصى بها',
-  pitchZones: 'تقسيم مناطق الملعب 6×5',
-  shotMaps: 'مواقع التسديدات واحتمالية التسجيل',
-  passingNetwork: 'شبكة التمريرات وتوزيع الكرة',
-  blueprintTendencies: 'الميول التكتيكية ومسارات الاستغلال',
-  vulnerabilityIndex: 'مؤشر الهشاشة',
+  overviewTab: 'نظرة عامة',
+  attackTab: 'الهجوم',
+  defenceTab: 'الدفاع',
+  buildupTab: 'بناء اللعب',
+  setpiecesTab: 'الكرات الثابتة',
+  opponentQuestion: 'كيف يهاجم الخصم، وأين تكمن نقاط الضعف التكتيكية في صفوفه؟',
+  thingsToExploit: 'نقاط ضعف للتركيز عليها واستغلالها',
+  threatsToNeutralize: 'مصادر الخطورة الواجب تحييدها',
+  tacticalBlueprint: 'المخطط التكتيكي وتوجهات اللعب',
+  shotLocationsXg: 'خريطة التسديدات والأهداف المتوقعة (xG)',
+  passingNetworkTopology: 'شبكة التمرير والترابط المكاني',
+  minPassesFilter: 'الحد الأدنى للتمريرات:',
+  setPieceVulnerabilities: 'هيكل الكرات الثابتة ونقاط الضعف الهوائية',
+  inswingingCorners: 'الركنيات الملتفة للداخل',
+  outswingingCorners: 'الركنيات الملتفة للخارج',
+  aerialDuelSuccess: 'نسبة الفوز بالالتحامات الهوائية',
+  directFreekickThreat: 'خطورة الركلات الحرة المباشرة',
 
-  teamA: 'الفريق أ (المستضيف / التركيز)',
-  teamB: 'الفريق ب (الخصم)',
-  h2hSim: 'محاكاة المواجهة',
+  squadRatingsQuestion: 'كيف تترتب أندية الدوري من حيث الفاعلية الهجومية والصلابة الدفاعية؟',
+  attackVsDefenceTitle: 'مخطط الفاعلية الهجومية مقابل الصلابة الدفاعية',
+  rankedStandings: 'ترتيب أندية الدوري التكتيكي',
+  quadrantTopRight: 'نخبة متوازنة',
+  quadrantTopLeft: 'قوة هجومية عالية',
+  quadrantBottomRight: 'تكتل دفاعي صلب',
+  quadrantBottomLeft: 'أداء غير مستقر',
+
+  playerScoutingQuestion: 'من هم اللاعبون الأنسب لنظامنا التكتيكي وأولويات التعاقد؟',
+  scoutingCandidates: 'قائمة اللاعبين المرشحين للكشف والمتابعة',
+  allPositions: 'جميع المراكز',
+  forwards: 'الهجوم',
+  midfielders: 'الوسط',
+  defenders: 'الدفاع',
+  goalkeepers: 'حراس المرمى',
+  scoutingVerdict: 'التقرير التقييمي للكشاف',
+
+  matchupQuestion: 'من سيكسب الصراعات المفصلية، وكيف نحسم التفوق التكتيكي؟',
+  teamA: 'فريقنا',
+  teamB: 'فريق الخصم',
+  yourTeamFocus: 'فريقنا (التركيز التكتيكي)',
+  opponentSquad: 'تشكيلة الخصم',
   ratingDelta: 'فارق التقييم',
-  phaseExploitation: 'مسارات استغلال مراحل اللعب',
-  tacticalMatchupSim: 'محاكاة المواجهة التكتيكية',
-  headToHeadHistory: 'سجل المواجهات المباشرة التاريخية',
-  noH2HHistory: 'لا توجد مواجهات مباشرة سابقة في نافذة الأرشيف الحالية.',
+  simulationForecast: 'توقعات محاكاة المباراة',
+  primaryEdge: 'التفوق التكتيكي الأساسي',
+  criticalZone: 'المنطقة الحاسمة',
+  battlegroundPitch: 'خريطة ساحات الصراع والمساحات القابلة للاختراق',
+  tacticalBreakdown: 'مقارنة المؤشرات التكتيكية بين الفريقين',
+  phaseGaps: 'فوارق مراحل اللعب القابلة للاستغلال',
+  headToHeadHistory: 'تاريخ المواجهات المباشرة',
+  noH2HHistory: 'لا توجد مواجهات مباشرة سابقة في الموسم الحالي.',
+  possession: 'نسبة الاستحواذ',
+  highPress: 'حدة الضغط العالي',
+  directSpeed: 'سرعة اللعب المباشر',
+  draw: 'تعادل',
+  simulationOdds: 'احتمالات محاكاة المباراة',
+  runsCount: '5000 تشغيل محاكاة',
+  attackingDirection: 'اتجاه الهجوم: من اليسار إلى اليمين',
+  vulnerability: 'نسبة الضعف',
+  evenFriction: 'تكافؤ تكتيكي عبر جميع مراحل اللعب.',
 
-  systemHealth: 'حالة النظام وقاعدة البيانات',
-  databaseStatus: 'قاعدة بيانات PostgreSQL العلائقية',
-  engineVersion: 'محرك التحليلات التكتيكية',
-  latency: 'زمن الاستجابة المباشر',
-  themeChoice: 'المظهر البصري',
-  themeLight: 'فاتح (ورق دافئ)',
-  themeDark: 'داكن (حبر دافئ)',
+  settingsTitle: 'إعدادات النظام والاتصال المباشر',
+  settingsSubtitle: 'إدارة المظهر البصري، وخيارات اللغة، والتحقق من صحة الاتصال بالخادم.',
+  themeChoice: 'المظهر ووضع العرض',
+  themeLight: 'الوضع الفاتح',
+  themeDark: 'الوضع الداكن',
   languageChoice: 'لغة الواجهة',
+  systemHealth: 'حالة البنية التحتية والاتصال المباشر',
+  pingApiHealth: 'فحص الاتصال بالخادم',
+  databaseStatus: 'اتصال قاعدة البيانات',
+  engineVersion: 'محرك التحليل التكتيكي',
+  latency: 'زمن الاستجابة',
+  matchesProcessed: 'المباريات المحللة',
+  eventActions: 'الأحداث التكتيكية المسجلة (SPADL)',
+  scoutedAthletes: 'اللاعبون المتاحون للكشافة',
+  calibratedClubs: 'الأندية المعتمدة في النظام',
 
   rank: '#',
   club: 'النادي',
   rating: 'التقييم',
   attack: 'الهجوم',
   defence: 'الدفاع',
-  archetype: 'نمط اللعب التكتيكي',
-  scout: 'معاينة',
   matches: 'المباريات',
   shots: 'التسديدات',
   goals: 'الأهداف',
-  xg: 'xG (احتمالية التسجيل)',
-  xa: 'xA (احتمالية الصناعة)',
+  xg: 'xG',
+  xa: 'xA',
   minutes: 'الدقائق',
   role: 'المركز',
+  inspect: 'فحص وتدقيق',
+  close: 'إغلاق',
+  chanceCreation: 'صناعة الفرص',
+  progression: 'التدرج بالكرة',
+  retention: 'الاحتفاظ والأمان',
+  dossier: 'ملف الكشافة التفصيلي',
+  percentileProfile: 'المظهر المئوي للمركز',
+  discoverView: 'استكشاف',
+  tableView: 'عرض الجدول',
+  xgTrendChart: 'مخطط مسار الأداء xG',
+  matchCards: 'بطاقات المباريات',
+  fullTable: 'سجل المباريات الكامل',
+  xgCreated: 'الأهداف المتوقعة المصنوعة',
+  xgConceded: 'الأهداف المتوقعة المستقبلة',
+  venue: 'الملعب',
+  differential: 'فارق xG',
   retryQuery: 'إعادة المحاولة',
-  noRecords: 'لا توجد سجلات في الأرشيف',
-  loading: 'جاري حساب النماذج التكتيكية...',
+  noRecords: 'لا توجد سجلات مطابقة',
+  loading: 'جاري تحميل البيانات التكتيكية...',
+  less: 'أقل',
+  more: 'أكثر',
 };
 
 const dictionaries: Record<Language, Translations> = { en, ar };

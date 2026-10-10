@@ -38,20 +38,20 @@ export function StatusIndicator({ className, showLatency = true }: StatusIndicat
   }
 
   const isDegraded = data.latencyMs > 500;
-  const dotColor = isDegraded ? 'bg-amber-400' : 'bg-emerald-400';
-  const textColor = isDegraded ? 'text-amber-300' : 'text-zinc-300';
+  const dotColor = isDegraded ? 'bg-warning' : 'bg-positive';
+  const textColor = isDegraded ? 'text-warning' : 'text-ink';
 
   return (
     <div
-      className={cn('inline-flex items-center gap-2 text-xs font-mono', textColor, className)}
+      className={cn('inline-flex items-center gap-2 text-xs font-sans font-medium px-2 py-1 rounded bg-bg-sunken border border-rule', textColor, className)}
       title={`Database: ${data.db} | Latency: ${data.latencyMs}ms | Version: ${data.version ?? '1.0.0'}`}
     >
       <span className="relative flex h-2 w-2">
         <span className={cn('animate-ping absolute inline-flex h-full w-full rounded-full opacity-60', dotColor)} />
         <span className={cn('relative inline-flex rounded-full h-2 w-2', dotColor)} />
       </span>
-      <span className="tabular-nums">
-        PGSQL Active {showLatency && <span className="text-zinc-500 ml-1">({data.latencyMs}ms)</span>}
+      <span className="tabular-nums font-mono text-2xs">
+        {data.db === 'ok' ? 'Live DB' : 'Offline'} {showLatency && <span className="text-ink-3 ml-0.5">({data.latencyMs}ms)</span>}
       </span>
     </div>
   );

@@ -1,14 +1,22 @@
 import React, { useState } from 'react';
-import { PitchCanvas } from '../../shared/components/PitchCanvas';
+import { Pitch } from '../../shared/components/PitchCanvas';
+import { PitchHeatmap } from '../../shared/components/PitchHeatmap';
+import { ShotMap } from '../../shared/components/ShotMap';
+import { ZoneGrid } from '../../shared/components/ZoneGrid';
+import { PassNetwork } from '../../shared/components/PassNetwork';
+import { ChannelDangerBar } from '../../shared/components/ChannelDangerBar';
+import { FormTimeline } from '../../shared/components/FormTimeline';
+import { PercentileBars } from '../../shared/components/PercentileBars';
 import { useTheme } from '../../shared/lib/useTheme';
 import { useI18n } from '../../shared/i18n';
-import { ArrowRight, ChevronDown, ChevronUp, Check, Info } from 'lucide-react';
+import { Sun, Moon, HelpCircle } from 'lucide-react';
+import type { ShotOut, ZonesOut, PassingNetworkOut, HeatmapOut } from '../../api/types';
 
 export function StyleGuidePage() {
   const { theme, toggleTheme } = useTheme();
   const { t } = useI18n();
-  const [isDisclosureOpen, setIsDisclosureOpen] = useState(false);
 
+  // Color tokens catalog
   const colors = [
     { name: '--bg', token: 'bg-bg', desc: 'Canvas background' },
     { name: '--bg-raised', token: 'bg-bg-raised', desc: 'Cards, drawers, panels' },
@@ -17,85 +25,185 @@ export function StyleGuidePage() {
     { name: '--ink-2', token: 'bg-ink-2', textToken: 'text-bg', desc: 'Secondary body text' },
     { name: '--ink-3', token: 'bg-ink-3', textToken: 'text-bg', desc: 'Captions, disabled text' },
     { name: '--rule', token: 'bg-rule', desc: '1px hairlines' },
-    { name: '--rule-strong', token: 'bg-rule-strong', textToken: 'text-bg', desc: '2px section title rules' },
-    { name: '--accent', token: 'bg-accent', textToken: 'text-accent-ink', desc: 'Vermilion red focus accent' },
+    { name: '--rule-strong', token: 'bg-rule-strong', textToken: 'text-bg', desc: '2px section rules' },
+    { name: '--accent', token: 'bg-accent', textToken: 'text-accent-ink', desc: 'Vermilion focus accent' },
     { name: '--positive', token: 'bg-positive', textToken: 'text-white', desc: 'Favorable delta' },
     { name: '--negative', token: 'bg-negative', textToken: 'text-white', desc: 'Adverse delta' },
-    { name: '--warning', token: 'bg-warning', textToken: 'text-white', desc: 'Alert / cautionary state' },
+    { name: '--warning', token: 'bg-warning', textToken: 'text-white', desc: 'Alert / caution state' },
+    { name: '--pitch', token: 'bg-pitch', desc: 'Pitch SVG surface' },
+    { name: '--pitch-line', token: 'bg-pitch-line', desc: '1px pitch markings' },
   ];
+
+  // Sample data for visualizations in Style Guide
+  const sampleShots: ShotOut[] = [
+    { action_id: 1, minute: 14, period_id: 1, player: { player_id: 101, name: 'M. Depay' }, team_id: 675, x: 92.4, y: 36.2, xg: 0.42, is_goal: true, bodypart: 'Right Foot', shot_type: 'open_play' },
+    { action_id: 2, minute: 28, period_id: 1, player: { player_id: 102, name: 'N. Fekir' }, team_id: 675, x: 86.1, y: 44.5, xg: 0.12, is_goal: false, bodypart: 'Left Foot', shot_type: 'open_play' },
+    { action_id: 3, minute: 55, period_id: 2, player: { player_id: 103, name: 'B. Traoré' }, team_id: 675, x: 96.2, y: 28.0, xg: 0.28, is_goal: true, bodypart: 'Head', shot_type: 'set_piece' },
+    { action_id: 4, minute: 68, period_id: 2, player: { player_id: 104, name: 'M. Dembélé' }, team_id: 675, x: 94.0, y: 33.5, xg: 0.35, is_goal: false, bodypart: 'Right Foot', shot_type: 'open_play' },
+    { action_id: 5, minute: 82, period_id: 2, player: { player_id: 102, name: 'N. Fekir' }, team_id: 675, x: 79.5, y: 31.0, xg: 0.06, is_goal: false, bodypart: 'Left Foot', shot_type: 'open_play' },
+  ];
+
+  const sampleZones: ZonesOut = {
+    team: { team_id: 675, name: 'Olympique Lyonnais' },
+    corridors: [
+      { corridor: 'flank', mean_vulnerability: 0.32, conceded_shot_chains: 18, conceded_goals: 4 },
+      { corridor: 'half_space', mean_vulnerability: 0.28, conceded_shot_chains: 12, conceded_goals: 2 },
+      { corridor: 'central', mean_vulnerability: 0.18, conceded_shot_chains: 8, conceded_goals: 1 },
+    ],
+    entry_routes: { flank_right: 0.44, central: 0.24, flank_left: 0.32 },
+    grid: Array.from({ length: 30 }).map((_, i) => {
+      const band = i % 6;
+      const channel = Math.floor(i / 6);
+      const isWorst = (band === 4 && channel === 3) || (band === 5 && channel === 4);
+      const corridorType: 'flank' | 'half_space' | 'central' =
+        channel === 0 || channel === 4 ? 'flank' : channel === 2 ? 'central' : 'half_space';
+      return {
+        zone_id: i,
+        zone_name: `Zone ${i + 1}`,
+        band,
+        channel,
+        band_name: `Band ${band + 1}`,
+        channel_name: `Channel ${channel + 1}`,
+        corridor: corridorType,
+        vulnerability_index: isWorst ? 0.38 : Number((0.04 + Math.sin(i) * 0.12).toFixed(2)),
+        conceded_entries_p90: isWorst ? 14.2 : 5.8,
+        conceded_xt_per_entry: 0.04,
+        conceded_shot_chains: isWorst ? 18 : 6,
+        conceded_goals: isWorst ? 2 : 0,
+        clean_recovery_rate: 0.54,
+        exposure_rank_in_team: i + 1,
+      };
+    }),
+  };
+
+  const samplePassNetwork: PassingNetworkOut = {
+    match_id: 101,
+    team: { team_id: 675, name: 'Olympique Lyonnais' },
+    min_passes: 3,
+    total_passes: 480,
+    nodes: [
+      { player: { player_id: 1, name: 'Anthony Lopes' }, x: 12, y: 34, passes_completed: 28, passes_received: 14, degree_centrality: 0.35, betweenness: 0.1 },
+      { player: { player_id: 2, name: 'Marcelo' }, x: 32, y: 22, passes_completed: 48, passes_received: 38, degree_centrality: 0.62, betweenness: 0.3 },
+      { player: { player_id: 3, name: 'Jason Denayer' }, x: 34, y: 46, passes_completed: 52, passes_received: 42, degree_centrality: 0.68, betweenness: 0.4 },
+      { player: { player_id: 4, name: 'Tanguy Ndombélé' }, x: 54, y: 36, passes_completed: 68, passes_received: 64, degree_centrality: 0.88, betweenness: 0.7 },
+      { player: { player_id: 5, name: 'Houssem Aouar' }, x: 62, y: 24, passes_completed: 58, passes_received: 52, degree_centrality: 0.82, betweenness: 0.5 },
+      { player: { player_id: 6, name: 'Nabil Fekir' }, x: 74, y: 38, passes_completed: 44, passes_received: 48, degree_centrality: 0.76, betweenness: 0.4 },
+      { player: { player_id: 7, name: 'Memphis Depay' }, x: 86, y: 28, passes_completed: 32, passes_received: 42, degree_centrality: 0.71, betweenness: 0.3 },
+    ],
+    edges: [
+      { source: 2, target: 3, count: 18 },
+      { source: 2, target: 4, count: 24 },
+      { source: 3, target: 4, count: 28 },
+      { source: 4, target: 5, count: 32 },
+      { source: 4, target: 6, count: 22 },
+      { source: 5, target: 7, count: 19 },
+    ],
+  };
+
+  const sampleHeatmap: HeatmapOut = {
+    nx: 32,
+    ny: 24,
+    pitch_length: 105.0,
+    pitch_width: 68.0,
+    counts: [],
+    max_count: 35,
+    n_actions: 1420,
+    filter: {},
+    sigma: 1.0,
+    p98_count: 32,
+    density: Array.from({ length: 24 }).map((_, y) =>
+      Array.from({ length: 32 }).map((_, x) => {
+        // High density in attacking right wing (x > 20, y > 14)
+        const d1 = Math.exp(-(((x - 24) ** 2) / 28 + ((y - 17) ** 2) / 16));
+        const d2 = Math.exp(-(((x - 18) ** 2) / 36 + ((y - 12) ** 2) / 24));
+        return Math.min(Math.max(d1 * 0.9 + d2 * 0.45, 0), 1);
+      })
+    ),
+  };
 
   return (
     <div className="p-6 md:p-10 max-w-5xl mx-auto space-y-12 pb-20">
       {/* Header */}
-      <header className="border-b border-rule pb-6">
-        <div className="text-2xs uppercase tracking-widest font-mono text-ink-3 mb-1">
-          DESIGN TOKENS & ARTIFACT SPECIFICATION
+      <header className="border-b border-rule pb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div className="text-2xs uppercase tracking-widest font-mono text-ink-3 mb-1">
+            DESIGN SYSTEM & COMPONENT SPECIFICATION
+          </div>
+          <h1 className="text-3xl md:text-5xl font-serif text-ink tracking-tight font-normal">
+            Tactical OS Style Guide & Visual Gallery
+          </h1>
+          <p className="text-sm md:text-base text-ink-2 mt-1 max-w-2xl leading-relaxed font-sans">
+            Complete gallery of reusable SVG pitch primitives and editorial chart components in both Light and Dark themes.
+          </p>
         </div>
-        <h1 className="text-4xl md:text-6xl font-serif text-ink tracking-tight font-normal">
-          Editorial Football Archive Style Guide
-        </h1>
-        <p className="text-sm md:text-base text-ink-2 mt-2 max-w-2xl leading-relaxed">
-          Inspired by printed football archives and architectural monographs. High-contrast serif headlines, monospace tabular data, hairline dividers, and a single vermilion accent.
-        </p>
+
+        <button
+          onClick={toggleTheme}
+          className="inline-flex items-center gap-2 px-3.5 py-2 rounded border border-rule bg-bg-raised text-xs font-mono text-ink hover:bg-bg-sunken transition-colors self-start sm:self-auto shrink-0"
+        >
+          {theme === 'dark' ? <Sun className="w-4 h-4 text-warning" /> : <Moon className="w-4 h-4 text-ink-2" />}
+          <span>Toggle Theme ({theme})</span>
+        </button>
       </header>
 
-      {/* 01 / TYPOGRAPHY SCALE */}
-      <section className="space-y-6">
+      {/* 01 / TYPOGRAPHY & NUMERALS */}
+      <section className="space-y-4">
         <div className="border-t-2 border-rule-strong pt-3">
           <span className="text-2xs font-mono font-bold tracking-wider uppercase text-ink">
-            01 / Typographic Scale & Hierarchy
+            01 / Typography Rules & Number Hierarchy
           </span>
         </div>
 
         <div className="p-6 rounded bg-bg-raised border border-rule space-y-6">
           <div className="border-b border-rule pb-4">
-            <span className="text-3xs font-mono text-ink-3 block uppercase">Display Hero (56px / Fraunces Serif)</span>
-            <div className="text-4xl sm:text-5xl md:text-6xl font-serif text-ink tracking-tight leading-none mt-1">
-              Tactical Fault Lines in Deep Build-Up
+            <span className="text-3xs font-mono text-ink-3 block uppercase">Serif Headline (Max 2 lines)</span>
+            <div className="text-2xl sm:text-3xl font-serif text-ink tracking-tight mt-1">
+              Lyon create most danger down the right wing and are vulnerable on set pieces.
             </div>
           </div>
 
           <div className="border-b border-rule pb-4">
-            <span className="text-3xs font-mono text-ink-3 block uppercase">Section Title (32px / Fraunces Serif)</span>
-            <div className="text-2xl sm:text-3xl font-serif text-ink mt-1">
-              Phase 02: Spatial Resistance & Press Triggers
+            <span className="text-3xs font-mono text-ink-3 block uppercase">48px Tabular Numeral Rating Row (No Boxes, Hairline Dividers)</span>
+            <div className="grid grid-cols-3 divide-x divide-rule border-y border-rule py-4 mt-2">
+              <div className="px-4 text-center">
+                <span className="text-3xs font-mono uppercase text-ink-3 block">Overall Rating</span>
+                <span className="text-4xl sm:text-5xl font-serif font-bold text-ink tabular-nums">7.8</span>
+                <span className="text-3xs text-ink-2 block pt-1">Top 18% in Europe</span>
+              </div>
+              <div className="px-4 text-center">
+                <span className="text-3xs font-mono uppercase text-ink-3 block">Attack</span>
+                <span className="text-4xl sm:text-5xl font-serif font-bold text-accent tabular-nums">8.4</span>
+                <span className="text-3xs text-ink-2 block pt-1">1.84 xG / 90</span>
+              </div>
+              <div className="px-4 text-center">
+                <span className="text-3xs font-mono uppercase text-ink-3 block">Defence</span>
+                <span className="text-4xl sm:text-5xl font-serif font-bold text-ink tabular-nums">6.2</span>
+                <span className="text-3xs text-ink-2 block pt-1">1.32 xG conceded</span>
+              </div>
             </div>
-          </div>
-
-          <div className="border-b border-rule pb-4">
-            <span className="text-3xs font-mono text-ink-3 block uppercase">Body Copy (15-16px / Inter Grotesk)</span>
-            <p className="text-sm sm:text-base text-ink leading-relaxed mt-1 max-w-prose">
-              The defensive block concedes high danger when forced to transition laterally. Full-backs tuck inwards, exposing the wide channels (Zones 21 & 25) to rapid overlaps.
-            </p>
           </div>
 
           <div>
-            <span className="text-3xs font-mono text-ink-3 block uppercase">Captions & Figures (11-12px / JetBrains Mono)</span>
-            <div className="text-xs font-mono text-ink-3 uppercase tracking-wider mt-1">
-              FIG. 04 — PASSING NETWORK CENTRALITY & EXPECTED THREAT (n = 38 FIXTURES)
-            </div>
+            <span className="text-3xs font-mono text-ink-3 block uppercase">UI Text & Captions</span>
+            <p className="text-xs text-ink font-sans leading-relaxed mt-1">
+              Sidebar and UI text use Inter regular 14px. Monospace is strictly reserved for kickers, captions, and table numbers.
+            </p>
           </div>
         </div>
       </section>
 
       {/* 02 / COLOR TOKENS */}
-      <section className="space-y-6">
-        <div className="border-t-2 border-rule-strong pt-3 flex items-center justify-between">
+      <section className="space-y-4">
+        <div className="border-t-2 border-rule-strong pt-3">
           <span className="text-2xs font-mono font-bold tracking-wider uppercase text-ink">
-            02 / Color Tokens & Palette
+            02 / Editorial Color Tokens
           </span>
-          <button
-            onClick={toggleTheme}
-            className="text-2xs font-mono text-accent hover:underline"
-          >
-            Toggle Theme ({theme})
-          </button>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {colors.map((c) => (
             <div key={c.name} className="p-3 rounded border border-rule bg-bg-raised space-y-2">
-              <div className={`h-12 w-full rounded border border-rule ${c.token} flex items-center justify-center`}>
+              <div className={`h-10 w-full rounded border border-rule ${c.token} flex items-center justify-center`}>
                 <span className={`text-2xs font-mono font-bold ${c.textToken || 'text-ink'}`}>{c.name}</span>
               </div>
               <div>
@@ -107,106 +215,101 @@ export function StyleGuidePage() {
         </div>
       </section>
 
-      {/* 03 / STAT NUMERALS & EVIDENCE CARDS */}
-      <section className="space-y-6">
+      {/* 03 / HERO VISUAL: PITCH HEATMAP */}
+      <section className="space-y-4">
         <div className="border-t-2 border-rule-strong pt-3">
           <span className="text-2xs font-mono font-bold tracking-wider uppercase text-ink">
-            03 / Editorial Stat Numerals
+            03 / Visualization Component: &lt;PitchHeatmap /&gt;
           </span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="p-5 rounded bg-bg-raised border border-rule">
-            <span className="text-3xs font-mono uppercase text-ink-3 block">OVERALL SQUAD RATING</span>
-            <div className="text-4xl font-serif font-bold text-ink mt-1 tabular-nums">9.2</div>
-            <div className="text-2xs font-mono text-positive mt-1">+0.4 vs league mean</div>
-          </div>
-
-          <div className="p-5 rounded bg-bg-raised border border-rule">
-            <span className="text-3xs font-mono uppercase text-ink-3 block">DANGER CREATED (XT / 90)</span>
-            <div className="text-4xl font-serif font-bold text-ink mt-1 tabular-nums">1.84</div>
-            <div className="text-2xs font-mono text-accent mt-1">98th percentile in Europe</div>
-          </div>
-
-          <div className="p-5 rounded bg-bg-raised border border-rule">
-            <span className="text-3xs font-mono uppercase text-ink-3 block">VULNERABILITY INDEX</span>
-            <div className="text-4xl font-serif font-bold text-ink mt-1 tabular-nums">0.28</div>
-            <div className="text-2xs font-mono text-negative mt-1">Zone 14 central leak</div>
-          </div>
+        <div className="p-6 rounded bg-bg-raised border border-rule">
+          <PitchHeatmap
+            data={sampleHeatmap}
+            title="Smoothed Danger Density Map"
+            subtitle="Sequential colormap from transparent to accent with direct pitch callout"
+            sampleSize="n = 38 matches"
+            annotationText="Primary danger: right wing overloads"
+            annotationX={78}
+            annotationY={48}
+          />
         </div>
       </section>
 
-      {/* 04 / FIGURES & DISCLOSURES */}
-      <section className="space-y-6">
+      {/* 04 / SHOT MAP */}
+      <section className="space-y-4">
         <div className="border-t-2 border-rule-strong pt-3">
           <span className="text-2xs font-mono font-bold tracking-wider uppercase text-ink">
-            04 / Figures, Plates & Progressive Disclosure
+            04 / Visualization Component: &lt;ShotMap /&gt;
           </span>
         </div>
 
-        <div className="p-5 rounded bg-bg-raised border border-rule space-y-4">
-          <div className="flex items-center justify-between border-b border-rule pb-3">
-            <div>
-              <span className="text-3xs font-mono uppercase text-ink-3 block">PLATE 01 / TACTICAL PITCH</span>
-              <h3 className="text-lg font-serif font-bold text-ink">Spatial Density on 105×68m Canvas</h3>
-            </div>
-            <span className="text-2xs font-mono text-ink-3">FIFA Standard Coordinates</span>
+        <div className="p-6 rounded bg-bg-raised border border-rule space-y-3">
+          <div className="border-b border-rule pb-2">
+            <h3 className="text-sm font-serif font-bold text-ink">Shot Locations & Expected Goals (xG)</h3>
+            <p className="text-2xs text-ink-3 font-sans">Glyphs sized by √xG; goals outlined in accent with pulse ring</p>
           </div>
-
-          <div className="max-w-xl mx-auto py-2">
-            <PitchCanvas className="border border-rule">
-              {/* Sample shot dots sized by xG */}
-              <circle cx="92" cy="34" r="3.2" fill="var(--accent)" fillOpacity="0.8" stroke="var(--ink)" strokeWidth="0.4" />
-              <circle cx="88" cy="28" r="2.0" fill="var(--positive)" fillOpacity="0.8" stroke="var(--ink)" strokeWidth="0.4" />
-              <circle cx="84" cy="42" r="1.5" fill="var(--ink-2)" fillOpacity="0.6" stroke="var(--ink)" strokeWidth="0.4" />
-            </PitchCanvas>
-          </div>
-
-          <div className="border-t border-rule pt-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-2xs font-mono text-ink-3">
-            <span>Fig. 01 — Shot locations & scoring probability (xG). Dot area is proportional to √xG.</span>
-            <button
-              onClick={() => setIsDisclosureOpen(!isDisclosureOpen)}
-              className="text-accent hover:underline inline-flex items-center gap-1 self-start sm:self-auto"
-            >
-              <span>{t.howToReadThis}</span>
-              {isDisclosureOpen ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-            </button>
-          </div>
-
-          {isDisclosureOpen && (
-            <div className="p-3 rounded bg-bg-sunken border border-rule text-xs text-ink-2 leading-relaxed animate-in fade-in duration-100">
-              <strong className="text-ink font-serif block mb-1">Interpretation Guide:</strong>
-              Each bubble indicates an unassisted or assisted shot on goal. Vermilion markers indicate successful goals scored; green circles designate high-probability chances denied by goalkeeper intervention.
-            </div>
-          )}
+          <ShotMap shots={sampleShots} showSummaryBar />
         </div>
       </section>
 
-      {/* 05 / BUTTONS & CONTROLS */}
-      <section className="space-y-6">
+      {/* 05 / ZONE VULNERABILITY MAP */}
+      <section className="space-y-4">
         <div className="border-t-2 border-rule-strong pt-3">
           <span className="text-2xs font-mono font-bold tracking-wider uppercase text-ink">
-            05 / Controls, Badges & Interactive States
+            05 / Visualization Component: &lt;ZoneGrid /&gt; (Vulnerability Map)
           </span>
         </div>
 
-        <div className="p-5 rounded bg-bg-raised border border-rule flex flex-wrap items-center gap-4">
-          <button className="px-4 py-2 rounded text-xs font-mono font-bold bg-accent text-accent-ink hover:opacity-90 transition-opacity">
-            Primary Action (Solid Accent)
-          </button>
+        <div className="p-6 rounded bg-bg-raised border border-rule space-y-3">
+          <div className="border-b border-rule pb-2">
+            <h3 className="text-sm font-serif font-bold text-ink">Zone Conceded Danger Index</h3>
+            <p className="text-2xs text-ink-3 font-sans">Pitch split into 30 zones with 2 highest vulnerability sectors highlighted</p>
+          </div>
+          <ZoneGrid data={sampleZones} />
+        </div>
+      </section>
 
-          <button className="px-4 py-2 rounded text-xs font-mono font-medium border border-rule bg-bg-sunken text-ink hover:bg-bg transition-colors">
-            Secondary Button
-          </button>
-
-          <button className="text-xs font-mono text-accent hover:underline inline-flex items-center gap-1">
-            <span>Text Underline Link</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
-
-          <span className="px-2 py-0.5 rounded text-3xs font-mono uppercase tracking-wider text-ink border border-rule bg-bg-sunken">
-            TAG / 1PX OUTLINE
+      {/* 06 / PASSING NETWORK */}
+      <section className="space-y-4">
+        <div className="border-t-2 border-rule-strong pt-3">
+          <span className="text-2xs font-mono font-bold tracking-wider uppercase text-ink">
+            06 / Visualization Component: &lt;PassNetwork /&gt;
           </span>
+        </div>
+
+        <div className="p-6 rounded bg-bg-raised border border-rule space-y-3">
+          <div className="border-b border-rule pb-2">
+            <h3 className="text-sm font-serif font-bold text-ink">Average Player Position & Pass Centrality</h3>
+            <p className="text-2xs text-ink-3 font-sans">Node sizes reflect touch involvement; edge thickness shows passing volume</p>
+          </div>
+          <PassNetwork data={samplePassNetwork} />
+        </div>
+      </section>
+
+      {/* 07 / SUPPORTING VISUALS: CHANNEL DANGER, FORM TIMELINE, PERCENTILE BARS */}
+      <section className="space-y-4">
+        <div className="border-t-2 border-rule-strong pt-3">
+          <span className="text-2xs font-mono font-bold tracking-wider uppercase text-ink">
+            07 / Supporting Visuals: Channel Bars, Timeline & Percentiles
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <ChannelDangerBar
+            channels={{ left: 32, centre: 24, right: 44 }}
+            title="Channel Attack Share"
+          />
+
+          <FormTimeline
+            title="Form Timeline"
+            subtitle="Last 5 matches with paired xG bars"
+          />
+
+          <PercentileBars
+            title="Percentile Profile"
+            subtitle="Benchmarked vs European league mean"
+          />
         </div>
       </section>
     </div>
