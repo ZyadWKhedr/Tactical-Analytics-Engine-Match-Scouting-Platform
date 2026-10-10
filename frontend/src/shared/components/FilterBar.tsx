@@ -28,7 +28,7 @@ export function FilterBar({
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <header className="h-13 border-b border-border bg-card/90 px-4 flex items-center justify-between gap-3 backdrop-blur-md sticky top-0 z-30">
+    <header className="h-14 border-b border-border bg-card/90 px-4 flex items-center justify-between gap-3 backdrop-blur-md sticky top-0 z-30 shrink-0">
       {/* Left side selectors */}
       <div className="flex items-center gap-2">
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">

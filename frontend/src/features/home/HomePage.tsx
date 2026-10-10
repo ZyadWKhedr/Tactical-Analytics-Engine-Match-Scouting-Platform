@@ -89,11 +89,11 @@ export function HomePage({
   return (
     <div className="p-4 sm:p-6 space-y-6 max-w-7xl mx-auto">
       {/* Top Section: Analytical Telemetry Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <StatCard
           label={t.databaseMatches}
           value={formatInt(meta?.n_matches ?? 1941)}
-          sampleSize="SPADL"
+          sampleSize="SPADL v1"
           unit="games"
           delta={0}
           deltaLabel="synced"
@@ -103,7 +103,7 @@ export function HomePage({
           label={t.eventCorpus}
           value={meta?.n_events ? (meta.n_events / 1000000).toFixed(2) : '2.46'}
           unit="M actions"
-          benchmark="105x68 calibrated"
+          benchmark="105×68 calibrated"
           sparklineData={[2.1, 2.2, 2.35, 2.46]}
         />
         <StatCard

@@ -108,50 +108,6 @@ def compute_smoothed_density(
     return np.round(density, 4).tolist(), round(max_val, 4)
 
 
-class DataRepository:
-    """Singleton repository caching parquet/json models and querying PostgreSQL."""
-
-    def __init__(self) -> None:
-        self.settings = get_settings()
-        self.engine = get_engine()
-        self._load_cached_models()
-
-    def _load_cached_models(self) -> None:
-        mdir = self.settings.models_dir
-        log.info("Loading model files from %s", mdir)
-
-        self.run_metadata: dict[str, Any] = {}
-        if (mdir / "run_metadata.json").exists():
-            self.run_metadata = json.loads((mdir / "run_metadata.json").read_text(encoding="utf-8"))
-
-        self.team_dossiers: dict[int, dict[str, Any]] = {}
-        if (mdir / "team_dossiers.json").exists():
-            dossiers_list = json.loads((mdir / "team_dossiers.json").read_text(encoding="utf-8"))
-            self.team_dossiers = {d["team_id"]: d for d in dossiers_list}
-
-        self.team_ratings_df = self._read_parquet_safe(mdir / "team_ratings.parquet")
-        self.team_playstyles_df = self._read_parquet_safe(mdir / "team_playstyles.parquet")
-        self.player_ratings_df = self._read_parquet_safe(mdir / "player_ratings.parquet")
-        self.team_swot_df = self._read_parquet_safe(mdir / "team_swot.parquet")
-        self.swot_metrics_df = self._read_parquet_safe(mdir / "swot_metrics.parquet")
-        self.zone_vuln_df = self._read_parquet_safe(mdir / "zone_vulnerabilities.parquet")
-        self.press_triggers_df = self._read_parquet_safe(mdir / "press_triggers.parquet")
-        self.entry_routes_df = self._read_parquet_safe(mdir / "entry_routes.parquet")
-        self.shots_xg_df = self._read_parquet_safe(mdir / "shots_xg.parquet")
-
-        self.xg_model_info: dict[str, Any] = {}
-        if (mdir / "xg_model.json").exists():
-            self.xg_model_info = json.loads((mdir / "xg_model.json").read_text(encoding="utf-8"))
-
-    @staticmethod
-    def _read_parquet_safe(path: Path) -> pd.DataFrame:
-        if path.exists():
-            try:
-                return pd.read_parquet(path)
-            except Exception as e:
-                log.error("Failed to read %s: %s", path, e)
-        return pd.DataFrame()
-
 WYSCOUT_TEAMS = {
     674: {"name": "Paris Saint-Germain", "country": "France", "team_type": "club"},
     675: {"name": "Olympique Lyonnais", "country": "France", "team_type": "club"},
@@ -268,6 +224,51 @@ DEFAULT_COMPETITIONS = [
     CompetitionOut(competition_id=426, season_id=181137, name="Bundesliga", season="2017/2018", country="Germany", n_matches=306),
     CompetitionOut(competition_id=28, season_id=10078, name="FIFA World Cup", season="2018", country="International", n_matches=64),
 ]
+
+
+class DataRepository:
+    """Singleton repository caching parquet/json models and querying PostgreSQL."""
+
+    def __init__(self) -> None:
+        self.settings = get_settings()
+        self.engine = get_engine()
+        self._load_cached_models()
+
+    def _load_cached_models(self) -> None:
+        mdir = self.settings.models_dir
+        log.info("Loading model files from %s", mdir)
+
+        self.run_metadata: dict[str, Any] = {}
+        if (mdir / "run_metadata.json").exists():
+            self.run_metadata = json.loads((mdir / "run_metadata.json").read_text(encoding="utf-8"))
+
+        self.team_dossiers: dict[int, dict[str, Any]] = {}
+        if (mdir / "team_dossiers.json").exists():
+            dossiers_list = json.loads((mdir / "team_dossiers.json").read_text(encoding="utf-8"))
+            self.team_dossiers = {d["team_id"]: d for d in dossiers_list}
+
+        self.team_ratings_df = self._read_parquet_safe(mdir / "team_ratings.parquet")
+        self.team_playstyles_df = self._read_parquet_safe(mdir / "team_playstyles.parquet")
+        self.player_ratings_df = self._read_parquet_safe(mdir / "player_ratings.parquet")
+        self.team_swot_df = self._read_parquet_safe(mdir / "team_swot.parquet")
+        self.swot_metrics_df = self._read_parquet_safe(mdir / "swot_metrics.parquet")
+        self.zone_vuln_df = self._read_parquet_safe(mdir / "zone_vulnerabilities.parquet")
+        self.press_triggers_df = self._read_parquet_safe(mdir / "press_triggers.parquet")
+        self.entry_routes_df = self._read_parquet_safe(mdir / "entry_routes.parquet")
+        self.shots_xg_df = self._read_parquet_safe(mdir / "shots_xg.parquet")
+
+        self.xg_model_info: dict[str, Any] = {}
+        if (mdir / "xg_model.json").exists():
+            self.xg_model_info = json.loads((mdir / "xg_model.json").read_text(encoding="utf-8"))
+
+    @staticmethod
+    def _read_parquet_safe(path: Path) -> pd.DataFrame:
+        if path.exists():
+            try:
+                return pd.read_parquet(path)
+            except Exception as e:
+                log.error("Failed to read %s: %s", path, e)
+        return pd.DataFrame()
 
     # -------------------------------------------------------------------------
     # Lookups & Mappings

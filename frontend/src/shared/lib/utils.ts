@@ -33,15 +33,15 @@ export function formatRating(val: number | null | undefined): string {
 }
 
 export function getRatingColor(val: number | null | undefined): string {
-  if (val === null || val === undefined) return 'text-zinc-400';
-  if (val >= 7.5) return 'text-emerald-400 font-semibold';
-  if (val >= 6.5) return 'text-emerald-300';
-  if (val >= 5.5) return 'text-zinc-200';
-  if (val >= 4.5) return 'text-amber-400';
-  return 'text-rose-400 font-semibold';
+  if (val === null || val === undefined) return 'text-muted-foreground font-mono';
+  if (val >= 7.5) return 'text-emerald-600 dark:text-emerald-400 font-bold font-mono';
+  if (val >= 6.5) return 'text-emerald-600 dark:text-emerald-400 font-mono';
+  if (val >= 5.5) return 'text-foreground font-mono';
+  if (val >= 4.5) return 'text-amber-600 dark:text-amber-400 font-mono';
+  return 'text-rose-600 dark:text-rose-400 font-bold font-mono';
 }
 
 export function getDeltaColor(val: number | null | undefined): string {
-  if (val === null || val === undefined || val === 0) return 'text-zinc-400';
-  return val > 0 ? 'text-emerald-400' : 'text-rose-400';
+  if (val === null || val === undefined || val === 0) return 'text-muted-foreground font-mono';
+  return val > 0 ? 'text-emerald-600 dark:text-emerald-400 font-mono' : 'text-rose-600 dark:text-rose-400 font-mono';
 }

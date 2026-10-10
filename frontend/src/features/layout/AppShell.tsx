@@ -60,23 +60,23 @@ export function AppShell({
       >
         <div>
           {/* Header Brand */}
-          <div className="h-13 px-3.5 border-b border-border flex items-center justify-between gap-2">
+          <div className="h-14 px-3 border-b border-border flex items-center justify-between gap-2 shrink-0">
             <div
               onClick={() => onTabChange('home')}
-              className="flex items-center gap-2.5 cursor-pointer hover:opacity-80 transition-opacity overflow-hidden"
+              className="flex items-center gap-2.5 cursor-pointer hover:opacity-85 transition-opacity min-w-0"
               title="Tactical OS — Match Intelligence"
             >
-              <div className="w-7 h-7 rounded bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center shrink-0">
+              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center shrink-0">
                 <Layers className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
               </div>
               {!isCollapsed && (
-                <div className="overflow-hidden">
-                  <div className="text-xs font-bold tracking-tight text-foreground font-mono leading-none truncate">
+                <div className="min-w-0 flex flex-col justify-center">
+                  <span className="text-xs font-bold tracking-wider text-foreground font-mono uppercase whitespace-nowrap overflow-hidden text-ellipsis block leading-tight">
                     {t.brandName}
-                  </div>
-                  <div className="text-3xs font-mono text-muted-foreground mt-0.5 leading-none truncate">
+                  </span>
+                  <span className="text-[10px] font-mono text-muted-foreground whitespace-nowrap overflow-hidden text-ellipsis block leading-tight mt-0.5">
                     {t.brandSubtitle}
-                  </div>
+                  </span>
                 </div>
               )}
             </div>
@@ -84,7 +84,7 @@ export function AppShell({
             {/* Sidebar Collapse Toggle */}
             <button
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-surface transition-colors focus:outline-none"
+              className="p-1.5 rounded text-muted-foreground hover:text-foreground hover:bg-surface transition-colors focus:outline-none shrink-0"
               title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             >
               {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
